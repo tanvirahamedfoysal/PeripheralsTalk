@@ -1,0 +1,47 @@
+[project]
+name = "peripherals-talk-backend"
+version = "0.1.0"
+description = "FastAPI backend for managing peripherals and device communication"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "PeripheralsTalk Team"},
+]
+keywords = ["fastapi", "api", "peripherals", "backend"]
+
+dependencies = [
+    # Web Framework
+    "fastapi[standard]>=0.136.3",
+    "uvicorn[standard]>=0.32.0",
+    # Database
+    "sqlalchemy>=2.0.0",
+    # Data Validation
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    # Environment Variables
+    "python-dotenv>=1.0.0",
+    # Security & Authentication (optional, uncomment as needed)
+    # "python-jose[cryptography]>=3.3.0",
+    # "passlib[bcrypt]>=1.7.4",
+    # "email-validator>=2.0.0",
+    # Utilities
+    "python-multipart>=0.0.6",
+    "python-jose[cryptography]>=3.5.0",
+    "fastapi-mail>=1.6.4",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=5.0.0",
+    "asyncpg>=0.31.0",
+    "greenlet>=3.5.1",
+    "psycopg2>=2.9.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "flake8>=7.0.0",
+    "mypy>=1.11.0",
+]
+
+[project.scripts]
+backend = "main:main"
