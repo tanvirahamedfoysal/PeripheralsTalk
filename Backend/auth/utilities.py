@@ -39,7 +39,7 @@ def verify_token(token: str) -> dict:
 def validate_admin_access(token: str):
     if verify_token(token)["is_valid"]:
         user = verify_token(token)["data"]
-        if user["role"] == "admin":
+        if user["role"] == "ADMIN":
             return {
                 "has_access": True,
                 "id": user["id"]
@@ -54,6 +54,52 @@ def validate_admin_access(token: str):
             "has_access": False,
             "message": "Invalid or expired token"
         }
+    
+def validate_user_access(token: str):
+    if verify_token(token)["is_valid"]:
+        user = verify_token(token)["data"]
+        if user["role"] == "USER":
+            return {
+                "has_access": True,
+                "id": user["id"]
+            }
+        else:
+            return {
+                "has_access": True,
+                "message": f"User also has {user['role']} privileges"
+            }
+    else:
+        return {
+            "has_access": False,
+            "message": "Invalid or expired token"
+        }
+    
+def validate_editor_access(token: str):
+    if verify_token(token)["is_valid"]:
+        user = verify_token(token)["data"]
+        if user["role"] == "EDITOR":
+            return {
+                "has_access": True,
+                "id": user["id"]
+            }
+        else:
+            if user["role"] == "ADMIN":
+                return {
+                    "has_access": True,
+                    "message": "User also has ADMIN privileges"
+                }
+            else:
+                return {
+                    "has_access": False,
+                    "message": "User does not have EDITOR privileges"
+                }
+    else:
+        return {
+            "has_access": False,
+            "message": "Invalid or expired token"
+        }
+
+
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
