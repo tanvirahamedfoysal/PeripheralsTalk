@@ -4,6 +4,7 @@ router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
 @router.get("/profile-photo")
 async def get_profile_photo():
+    # by JWT
     return {
         "message": "Not implemented yet"
     }

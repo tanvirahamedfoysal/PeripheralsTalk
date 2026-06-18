@@ -27,12 +27,12 @@ def verify_token(token: str) -> dict:
             algorithms=[getattr(settings, "algorithm", "HS256")]
         )
         return {
-            "is_verified": True,
+            "is_valid": True,
             "data": payload
         }
     except JWTError:
         return {
-            "is_verified": False,
+            "is_valid": False,
             "data": None
         }
 

@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Backend.auth.utilities import create_token, hash_password, verify_password
+from Backend.auth.utilities import create_token, hash_password, verify_password, verify_token
 from Backend.db.database import get_db
-from Backend.schemas.auth import UserCreate, UserLogin
+from Backend.schemas.auth import UserCreate, UserLogin, ValidateTokenPayload
 
-router = APIRouter(
-    prefix="/api/v1/auth",
-    tags=["authentication"]
-)
+router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 DEFAULT_IMAGE_URL = (
     "https://res.cloudinary.com/dqaj2you5/image/upload/"
@@ -18,8 +16,22 @@ DEFAULT_IMAGE_URL = (
 DEFAULT_PUBLIC_ID = "peripheralstalk/eqrhuu2yxmiaro5rai4f"
 
 
-@router.post("/register")
+@router.post("/validate-token")
+async def validate_token(
+    payload: ValidateTokenPayload
+):
+    response = verify_token(payload.token)
+    if not response["is_valid"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="The token is invalid or has expired"
+        )
+    return {
+        "message": "Token is valid",
+        "user": response["data"]
+    }
 
+@router.post("/register")
 async def register(
     payload: UserCreate,
     db: AsyncSession = Depends(get_db)
@@ -44,13 +56,11 @@ async def register(
         text("""
             INSERT INTO peripheralstalk.images
             (
-                url,
-                public_id
+                url, public_id
             )
             VALUES 
             (
-                :url,
-                :public_id
+                :url, :public_id
             )
             RETURNING id
         """),
@@ -89,7 +99,6 @@ async def register(
             "role": user["role"]
         }
     )
-
     return {
         "message": "User registered successfully",
         "access_token": access_token,
