@@ -6,7 +6,7 @@ from Backend.core.config import settings
 
 
 def create_token(data: dict):
-    payload = data.copy()
+    payload = data.copy() 
     expire = datetime.now(UTC) + timedelta(
         minutes=getattr(settings, "access_token_expire_minutes", None) or getattr(settings, "access_token_expire_minutes", 60)
     )
@@ -36,21 +36,29 @@ def verify_token(token: str) -> dict:
             "data": None
         }
 
+def validate_admin_access(token: str):
+    if verify_token(token)["is_valid"]:
+        user = verify_token(token)["data"]
+        if user["role"] == "admin":
+            return {
+                "has_access": True,
+                "id": user["id"]
+            }
+        else:
+            return {
+                "has_access": False,
+                "message": "User does not have admin privileges"
+            }
+    else:
+        return {
+            "has_access": False,
+            "message": "Invalid or expired token"
+        }
 
-pwd_context = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto"
-)
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-def verify_password(
-    plain_password: str,
-    hashed_password: str
-) -> bool:
-
-    return pwd_context.verify(
-        plain_password,
-        hashed_password
-    )
+def verify_password( plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify( plain_password, hashed_password)
