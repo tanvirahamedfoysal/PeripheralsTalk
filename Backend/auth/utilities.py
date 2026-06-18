@@ -61,11 +61,13 @@ def validate_user_access(token: str):
         if user["role"] == "USER":
             return {
                 "has_access": True,
-                "id": user["id"]
+                "id": user["id"],
+                "message": "User has USER privileges"
             }
         else:
             return {
                 "has_access": True,
+                "id": user["id"],
                 "message": f"User also has {user['role']} privileges"
             }
     else:
@@ -80,12 +82,14 @@ def validate_editor_access(token: str):
         if user["role"] == "EDITOR":
             return {
                 "has_access": True,
-                "id": user["id"]
+                "id": user["id"],
+                "message": "User has ADMIN privileges"
             }
         else:
             if user["role"] == "ADMIN":
                 return {
                     "has_access": True,
+                    "id": user["id"],
                     "message": "User also has ADMIN privileges"
                 }
             else:
