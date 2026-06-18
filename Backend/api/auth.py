@@ -23,7 +23,7 @@ async def validate_token(
     response = verify_token(payload.token)
     if not response["is_valid"]:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="The token is invalid or has expired"
         )
     return {
