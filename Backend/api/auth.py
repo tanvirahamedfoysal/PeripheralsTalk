@@ -47,7 +47,7 @@ async def register(
                 url,
                 public_id
             )
-            VALUES
+            VALUES 
             (
                 :url,
                 :public_id
@@ -65,17 +65,11 @@ async def register(
         text("""
             INSERT INTO peripheralstalk.users
             (
-                name,
-                email,
-                hashed_password,
-                image_id
+                name, email, hashed_password, image_id
             )
             VALUES
             (
-                :name,
-                :email,
-                :password,
-                :image_id
+                :name, :email, :password, :image_id
             )
             RETURNING id, role, is_active
         """),

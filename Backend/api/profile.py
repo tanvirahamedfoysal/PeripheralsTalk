@@ -2,6 +2,11 @@ from fastapi import APIRouter
 
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
+@router.get("/profile-photo")
+async def get_profile_photo():
+    return {
+        "message": "Not implemented yet"
+    }
 
 @router.get("/all")
 async def get_all_users():
