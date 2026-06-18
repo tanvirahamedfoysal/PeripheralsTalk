@@ -33,6 +33,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "greenlet>=3.5.1",
     "psycopg2>=2.9.12",
+    "cloudinary>=1.44.2",
 ]
 
 [project.optional-dependencies]

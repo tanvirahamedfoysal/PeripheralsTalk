@@ -1,19 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
+from Backend.services.cloudinary.uploader import upload_image as upload_to_cloudinary
 
 router = APIRouter(prefix="/api/v1/utility", tags=["utility"])
 
-
-# @router.get("/auth-status")
-# async def auth_status():
-#     """Authentication status endpoint"""
-#     return {
-#         "authenticated": False,
-#         "message": "Authentication is not configured yet.",
-#     }
-
 @router.post("/upload-image")
-async def upload_image():
-    return {
-        "message": "Not implemented yet"
-    }
-
+async def upload_image(file: UploadFile = File(...)):
+    return await upload_to_cloudinary(file)

@@ -1,6 +1,6 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+import cloudinary
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / ".env"
@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     internal_api_key: str
     algorithm: str
     access_token_expire_minutes: int
+
+    cloudinary_cloud_name: str
+    cloudinary_api_key: str
+    cloudinary_api_secret: str
 
     debug: bool
     environment: str
@@ -47,3 +51,11 @@ async def async_init_settings() -> Settings:
 
     # Re-validate settings (pydantic will perform validation on first access)
     return settings
+
+
+cloudinary.config(
+    cloud_name=settings.cloudinary_cloud_name,
+    api_key=settings.cloudinary_api_key,
+    api_secret=settings.cloudinary_api_secret,
+    secure=True
+)

@@ -3,14 +3,6 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
 
-# @router.get("/auth-status")
-# async def auth_status():
-#     """Authentication status endpoint"""
-#     return {
-#         "authenticated": False,
-#         "message": "Authentication is not configured yet.",
-#     }
-
 @router.get("/all")
 async def get_all_users():
     return {

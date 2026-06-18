@@ -1,5 +1,14 @@
 CREATE SCHEMA IF NOT EXISTS peripheralstalk;
 
+
+CREATE TABLE peripheralstalk.images (
+    id SERIAL PRIMARY KEY,
+    url TEXT NOT NULL,
+    public_id TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 CREATE TYPE peripheralstalk.user_role AS ENUM (
     'ADMIN',
     'EDITOR',
@@ -11,6 +20,7 @@ CREATE TABLE peripheralstalk.users (
     email VARCHAR(255) UNIQUE NOT NULL,
     hashed_password TEXT NOT NULL,
     role peripheralstalk.user_role DEFAULT 'USER',
+    image_id INTEGER REFERENCES peripheralstalk.images(id),
     is_active BOOLEAN DEFAULT TRUE
 );
 
@@ -75,12 +85,9 @@ CREATE TABLE peripheralstalk.comments (
     article_id INTEGER REFERENCES peripheralstalk.articles(id),
     user_id INTEGER REFERENCES peripheralstalk.users(id),
     parent_comment_id INTEGER REFERENCES peripheralstalk.comments(id),
-
     content TEXT NOT NULL,
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
@@ -89,17 +96,12 @@ CREATE TYPE peripheralstalk.comment_vote_type AS ENUM (
     'UPVOTE',
     'DOWNVOTE'
 );
-
 CREATE TABLE peripheralstalk.comment_votes (
     id SERIAL PRIMARY KEY,
-
     comment_id INTEGER REFERENCES peripheralstalk.comments(id),
     user_id INTEGER REFERENCES peripheralstalk.users(id),
-
     vote_type peripheralstalk.comment_vote_type NOT NULL,
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     UNIQUE (comment_id, user_id)
 );
 
@@ -108,21 +110,15 @@ CREATE TYPE peripheralstalk.report_status AS ENUM (
     'PENDING',
     'RESOLVED'
 );
-
 CREATE TABLE peripheralstalk.reports (
     id SERIAL PRIMARY KEY,
-
     reporter_id INTEGER REFERENCES peripheralstalk.users(id),
     reported_user_id INTEGER REFERENCES peripheralstalk.users(id),
-
     comment_id INTEGER REFERENCES peripheralstalk.comments(id),
-
     note TEXT,
-
     status peripheralstalk.report_status DEFAULT 'PENDING',
-
     reviewed_by INTEGER REFERENCES peripheralstalk.users(id),
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP
 );
+
