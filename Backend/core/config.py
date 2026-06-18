@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     api_description: str
 
     database_url: str
-    database_url: str
     database_echo: bool = False
     secret_key: str
     internal_api_key: str

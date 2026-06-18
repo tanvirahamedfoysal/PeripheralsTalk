@@ -1,17 +1,15 @@
-from typing import Tuple, List
-
-from sqlalchemy import inspect
+from Backend.core import settings
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
     async_sessionmaker,
 )
 
-from Backend.core import settings
 
 engine = create_async_engine(
     settings.database_url,
     echo=True,
+    connect_args={"ssl": True}
 )
 
 AsyncSessionLocal = async_sessionmaker(
