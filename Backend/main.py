@@ -4,17 +4,17 @@ import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-# Ensure the repository root is on sys.path when running from within Backend/
+# Ensure the Backend root directory is on sys.path so local imports work
 current_file = Path(__file__).resolve()
-project_root = current_file.parent.parent
+project_root = current_file.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from Backend.api import router
-from Backend.core import settings, async_init_settings
+from api import router
+from core import settings, async_init_settings
 
 
 @asynccontextmanager
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "Backend.main:app",
+        app,
         host="0.0.0.0",
         port=8000,
         reload=settings.debug,

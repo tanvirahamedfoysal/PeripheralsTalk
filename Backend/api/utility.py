@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
-from Backend.services.cloudinary.uploader import upload_image as upload_to_cloudinary
+from services.cloudinary.uploader import upload_image as upload_to_cloudinary
 
 router = APIRouter(prefix="/api/v1/utility", tags=["utility"])
 

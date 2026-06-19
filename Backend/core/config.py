@@ -9,29 +9,29 @@ if not ENV_FILE.exists():
 
 
 class Settings(BaseSettings):
-    api_title: str
-    api_version: str
-    api_description: str
+    api_title: str = "PeripheralsTalk API"
+    api_version: str = "0.1.0"
+    api_description: str = "FastAPI backend for PeripheralsTalk"
 
-    database_url: str
+    database_url: str = "sqlite+aiosqlite:///./peripheralstalk.db"
     database_echo: bool = False
-    secret_key: str
-    internal_api_key: str
-    algorithm: str
-    access_token_expire_minutes: int
+    secret_key: str = "CHANGE_ME_SECRET"
+    internal_api_key: str = ""
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
-    cloudinary_cloud_name: str
-    cloudinary_api_key: str
-    cloudinary_api_secret: str
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: str = ""
 
-    smtp_host: str
-    smtp_port: int
-    smtp_username: str
-    smtp_password: str
-    mail_from: str
+    smtp_host: str = "smtp-relay.brevo.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    mail_from: str = "no-reply@example.com"
 
-    debug: bool
-    environment: str
+    debug: bool = True
+    environment: str = "development"
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,

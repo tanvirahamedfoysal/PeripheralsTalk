@@ -1,4 +1,4 @@
-from Backend.core.config import settings
+from core.config import settings
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
 

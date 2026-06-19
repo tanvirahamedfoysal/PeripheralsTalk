@@ -3,10 +3,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Backend.auth.utilities import create_token, hash_password, verify_password, verify_token
-from Backend.db.database import get_db
-from Backend.schemas.auth import UserCreate, UserLogin, ValidateTokenPayload
-from Backend.services.brevo.send_email import send_email_service
+from auth.utilities import create_token, hash_password, verify_password, verify_token
+from db.database import get_db
+from schemas.auth import UserCreate, UserLogin, ValidateTokenPayload
+from services.brevo.send_email import send_email_service
 
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 

@@ -1,5 +1,4 @@
 import cloudinary.uploader
-from Backend.services.cloudinary import *
 
 
 async def upload_image(file):

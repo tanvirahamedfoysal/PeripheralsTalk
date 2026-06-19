@@ -1,15 +1,19 @@
-from Backend.core import settings
+from core import settings
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
     async_sessionmaker,
 )
+from sqlalchemy.engine import make_url
 
+
+engine_url = make_url(settings.database_url)
+connect_args = {"ssl": True} if engine_url.drivername in {"postgresql", "postgres"} else {}
 
 engine = create_async_engine(
     settings.database_url,
     echo=True,
-    connect_args={"ssl": True}
+    connect_args=connect_args,
 )
 
 AsyncSessionLocal = async_sessionmaker(

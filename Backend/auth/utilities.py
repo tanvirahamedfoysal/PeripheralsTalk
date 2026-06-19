@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, UTC
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from Backend.core.config import settings
+from core.config import settings
 
 
 def create_token(data: dict):
