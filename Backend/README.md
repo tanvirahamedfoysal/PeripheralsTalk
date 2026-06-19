@@ -6,33 +6,36 @@ A FastAPI backend for managing peripherals and device communication.
 
 ```
 ./
-├── app/
+├── __init__.py
+├── main.py                         # FastAPI app initialization
+├── api/                            # API routers
 │   ├── __init__.py
-│   ├── main.py                     # FastAPI app initialization
-│   ├── api/                        # API routers
-│   │   ├── __init__.py
-│   │   └── v1/
-│   │       ├── __init__.py
-│   │       ├── auth.py
-│   │       └── routes.py
-│   ├── core/                       # Core settings
-│   │   ├── __init__.py
-│   │   └── config.py
-│   ├── db/                         # Database configuration
-│   │   ├── __init__.py
-│   │   └── database.py
-│   ├── models/                     # ORM models
-│   │   ├── __init__.py
-│   │   └── base.py
-│   ├── schemas/                    # Pydantic schemas
-│   │   ├── __init__.py
-│   │   └── base.py
-│   ├── crud/                       # CRUD operations
-│   │   └── __init__.py
-│   ├── utils/                      # Utility helpers
-│   │   └── __init__.py
-├── .env                             # Environment variables (local)
-├── pyproject.toml                   # Project dependencies
+│   ├── auth.py
+│   ├── article.py
+│   ├── category.py
+│   ├── comment.py
+│   ├── profile.py
+│   └── utility.py
+├── auth/                           # Authentication utilities
+│   └── utilities.py
+├── core/                           # Core settings
+│   ├── __init__.py
+│   └── config.py
+├── db/                             # Database configuration
+│   ├── __init__.py
+│   └── database.py
+├── models/                         # ORM models
+│   ├── __init__.py
+│   ├── base.py
+│   └── device.py
+├── schemas/                        # Pydantic schemas
+│   ├── __init__.py
+│   └── base.py
+├── services/                       # External service integrations
+│   ├── brevo/
+│   └── cloudinary/
+├── .env                            # Environment variables (local)
+├── pyproject.toml                  # Project dependencies
 └── README.md
 ```
 
@@ -67,11 +70,12 @@ A FastAPI backend for managing peripherals and device communication.
 ### Running the Application
 
 ```bash
-# Run directly from the app package
-python app/main.py
+# Run directly from the Backend package directory
+cd Backend
+python main.py
 
-# Or run with uvicorn
-uvicorn app.main:app --reload
+# Or run from the repository root with an explicit module path
+uvicorn Backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The API is available at `http://localhost:8000`.
@@ -92,16 +96,16 @@ The API is available at `http://localhost:8000`.
 
 ```bash
 # Format code
-black app
+black Backend
 
 # Sort imports
-isort app
+isort Backend
 
 # Lint
-flake8 app
+flake8 Backend
 
 # Type check
-mypy app
+mypy Backend
 ```
 
 ## Adding New Features
@@ -109,12 +113,12 @@ mypy app
 1. Create a model in `app/models/`.
 2. Create matching Pydantic schemas in `app/schemas/`.
 3. Add database operations in `app/crud/`.
-4. Add routes under `app/api/v1/`.
-5. Include new routers through `app/api/__init__.py`.
+4. Add routes under `Backend/api/`.
+5. Include new routers through `Backend/api/__init__.py`.
 
 ## Configuration
 
-Application settings are loaded from environment variables in `app/core/config.py`.
+Application settings are loaded from environment variables in `Backend/core/config.py`.
 
 ### Environment Variables
 
@@ -199,7 +203,7 @@ RUN pip install .
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "Backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### Production Server
@@ -208,7 +212,7 @@ Use a production-grade ASGI server:
 
 ```bash
 # Using Gunicorn with Uvicorn workers
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker Backend.main:app
 ```
 
 ## Security Considerations

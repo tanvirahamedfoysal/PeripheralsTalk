@@ -48,4 +48,4 @@ dev = [
 backend = "main:main"
 
 [tool.fastapi]
-entrypoint = "main:app"
+entrypoint = "Backend.main:app"

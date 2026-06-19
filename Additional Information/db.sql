@@ -30,7 +30,6 @@ CREATE TYPE peripheralstalk.editor_application_status AS ENUM (
     'APPROVED',
     'REJECTED'
 );
-
 CREATE TABLE peripheralstalk.editor_applications (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES peripheralstalk.users(id),
@@ -122,3 +121,32 @@ CREATE TABLE peripheralstalk.reports (
     reviewed_at TIMESTAMP
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO peripheralstalk.peripherals (name)
+VALUES
+    ('Keyboard'),
+    ('Mouse'),
+    ('Printer'),
+    ('Scanner'),
+    ('Camera'),
+    ('Microphone'),
+    ('Projector'),
+    ('Speaker'),
+    ('External HDD'),
+    ('Modem'),
+    ('Router'),
+    ('Switch'),
+    ('USB'),
+    ('Game Controller');
