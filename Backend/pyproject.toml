@@ -46,3 +46,6 @@ dev = [
 
 [project.scripts]
 backend = "main:main"
+
+[tool.fastapi]
+entrypoint = "main:app"
