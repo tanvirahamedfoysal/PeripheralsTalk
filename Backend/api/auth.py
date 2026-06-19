@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from Backend.auth.utilities import create_token, hash_password, verify_password, verify_token
 from Backend.db.database import get_db
 from Backend.schemas.auth import UserCreate, UserLogin, ValidateTokenPayload
+from Backend.services.brevo.send_email import send_email_service
 
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
@@ -160,9 +161,12 @@ async def login(
 
 @router.post("/request-reset-password")
 async def request_reset_password():
-    return {
-        "message": "Not implemented yet"
-    }
+    email = "tanvirahamed.foysal.00@gmail.com"
+    subject = "For Testing Purpose"
+    body = "This is the body of the testing email"
+    
+    return await send_email_service(email, subject, body)
+
 
 @router.post("/reset-password")
 async def reset_password():

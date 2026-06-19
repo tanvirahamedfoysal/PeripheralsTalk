@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from Backend.auth.utilities import validate_user_access
 
 router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 

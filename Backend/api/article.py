@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from Backend.auth.utilities import validate_editor_access, validate_user_access
 
 router = APIRouter(prefix="/api/v1/article", tags=["article"])
 
@@ -31,9 +32,7 @@ async def make_article_active(category_id: int, article_id: int):
 @router.delete("/{article_id}")
 async def delete_article(article_id: int):
     return {
-
         "message": "Not implemented yet"
-
     }   
 
 @router.post("/{article_id}/vote")

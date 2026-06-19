@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     cloudinary_api_key: str
     cloudinary_api_secret: str
 
+    smtp_host: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
+    mail_from: str
+
     debug: bool
     environment: str
 
