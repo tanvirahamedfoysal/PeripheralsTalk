@@ -1,0 +1,11 @@
+Log-in:
+    username / email
+    password
+
+
+Admin:
+    'Tanvir Ahamed Foysal', 
+    'tanvirahamed', 
+    'tanvirahamed.foysal.00@gmail.com', 
+    'iamadmin'
+

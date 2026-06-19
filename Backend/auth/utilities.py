@@ -103,8 +103,6 @@ def validate_editor_access(token: str):
             "message": "Invalid or expired token"
         }
 
-
-
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def hash_password(password: str) -> str:

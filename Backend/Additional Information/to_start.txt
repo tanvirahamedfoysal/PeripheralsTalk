@@ -1,0 +1,19 @@
+repository root:
+    # Create and activate virtualenv
+    python -m venv .venv
+    source .venv/bin/activate
+
+    # Install / add dependencies using `uv`
+    # Add packages (example):
+    #   uv add fastapi[standard] sqlalchemy
+    # Add dev tools (example):
+    #   uv add --dev black isort
+
+    # Install packages from lock / pyproject
+    uv install
+
+    # Prepare environment
+    cp .env.example .env
+
+    # Run the app (development)
+    uvicorn Backend.main:app --reload --host 0.0.0.0 --port 8000

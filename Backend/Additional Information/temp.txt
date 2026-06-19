@@ -1,0 +1,14 @@
+Default Image:
+{
+  "url": "https://res.cloudinary.com/dqaj2you5/image/upload/v1781759446/peripheralstalk/eqrhuu2yxmiaro5rai4f.png",
+  "public_id": "peripheralstalk/eqrhuu2yxmiaro5rai4f"
+}
+
+
+DATABASE_URL=postgresql+asyncpg://zombie:12345678@localhost:5432/mydb
+
+
+
+
+
+SMTP_KEY=xsmtpsib-13a6f0549a73f6a0525d61fddbd0e8864cc60f7c79d05676a8a924b8ca26f396-WAHfc0ybQqSgp09N
