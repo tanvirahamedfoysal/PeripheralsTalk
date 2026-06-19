@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/install-state.gz
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production
+*.pem
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Keep the public environment template
+!.env.example
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# Package-manager caches
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+
+# Operating systems
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local certificates
+certificates/
+*.key
+*.crt
+
+# Generated OpenAPI files
+src/lib/api/generated/*
+!src/lib/api/generated/.gitkeep
+
+# Mock Service Worker generated file
+public/mockServiceWorker.js
+
+# Temporary uploads
+tmp/
+uploads/
+
+# Vercel
+.vercel/
+
+# Netlify
+.netlify/
+
+# Turbo
+.turbo/
+
+# Miscellaneous
+*.log
+.cache/
