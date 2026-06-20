@@ -1,0 +1,52 @@
+export const apiPaths = {
+  auth: {
+    register: "auth/register",
+    login: "auth/login",
+    validate: "auth/validate-token",
+    requestReset: "auth/request-reset-password",
+    reset: "auth/reset-password",
+  },
+  category: {
+    list: "category/",
+    detail: (id: number | string) => `category/${id}`,
+    create: "category/",
+    update: (id: number | string) => `category/${id}`,
+    remove: (id: number | string) => `category/${id}`,
+  },
+  article: {
+    detail: (id: number | string) => `article/${id}`,
+    update: (id: number | string) => `article/${id}`,
+    byCategory: (id: number | string) => `article/${id}/all-articles`,
+    makeActive: (categoryId: number | string, articleId: number | string) =>
+      `article/${categoryId}/make-active/${articleId}`,
+    remove: (id: number | string) => `article/${id}`,
+    vote: (id: number | string) => `article/${id}/vote`,
+    favourite: (id: number | string) => `article/toggle_favourite/${id}`,
+  },
+  comment: {
+    forArticle: (id: number | string) => `comment/${id}`,
+    remove: (id: number | string) => `comment/${id}`,
+    update: (id: number | string) => `comment/${id}`,
+    up: (id: number | string) => `comment/${id}/up-vote`,
+    down: (id: number | string) => `comment/${id}/down-vote`,
+    report: (id: number | string) => `comment/${id}/report`,
+  },
+  profile: {
+    photo: "profile/profile-photo",
+    all: "profile/all",
+    me: "profile/me",
+    requestEditor: "profile/request-for-editor-access",
+  },
+  admin: {
+    editorRequests: "admin/get-editor-request",
+    makeEditor: (id: number | string) => `admin/make-editor/${id}`,
+    revokeEditor: (id: number | string) => `admin/revoke-editor/${id}`,
+    suspend: (id: number | string) => `admin/suspend-user/${id}`,
+    unsuspend: (id: number | string) => `admin/unsuspend-user/${id}`,
+    reports: "admin/all-report",
+    resolveReport: (id: number | string) => `admin/resolve-report/${id}`,
+    userByComment: (id: number | string) => `admin/get-user-by-comment/${id}`,
+    resetPassword: (id: number | string) => `admin/reset-user-password/${id}`,
+  },
+  utility: { upload: "utility/upload-image" },
+} as const;
