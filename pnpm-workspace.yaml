@@ -1,0 +1,6 @@
+packages:
+  - "Frontend"
+
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
