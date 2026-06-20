@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, UTC, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -7,9 +7,8 @@ from core.config import settings
 
 def create_token(data: dict):
     payload = data.copy() 
-    expire = datetime.now(UTC) + timedelta(
-        minutes=getattr(settings, "access_token_expire_minutes", None) or getattr(settings, "access_token_expire_minutes", 60)
-    )
+    expire_minutes = getattr(settings, "access_token_expire_minutes", 60)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
     payload.update({"exp": expire})
     token = jwt.encode(
         payload,
@@ -18,7 +17,7 @@ def create_token(data: dict):
     )
     return token
 
-
+ 
 def verify_token(token: str) -> dict:
     try:
         payload = jwt.decode(
@@ -37,11 +36,13 @@ def verify_token(token: str) -> dict:
         }
 
 def validate_admin_access(token: str):
-    if verify_token(token)["is_valid"]:
-        user = verify_token(token)["data"]
+    token_response = verify_token(token)
+    if token_response["is_valid"]:
+        user = token_response["data"]
         if user["role"] == "ADMIN":
             return {
                 "has_access": True,
+                "message": "User has ADMIN privileges",
                 "id": user["id"]
             }
         else:
@@ -56,8 +57,9 @@ def validate_admin_access(token: str):
         }
     
 def validate_user_access(token: str):
-    if verify_token(token)["is_valid"]:
-        user = verify_token(token)["data"]
+    token_response = verify_token(token)
+    if token_response["is_valid"]:
+        user = token_response["data"]
         if user["role"] == "USER":
             return {
                 "has_access": True,
@@ -77,13 +79,14 @@ def validate_user_access(token: str):
         }
     
 def validate_editor_access(token: str):
-    if verify_token(token)["is_valid"]:
-        user = verify_token(token)["data"]
+    token_response = verify_token(token)
+    if token_response["is_valid"]:
+        user = token_response["data"]
         if user["role"] == "EDITOR":
             return {
                 "has_access": True,
                 "id": user["id"],
-                "message": "User has ADMIN privileges"
+                "message": "User has EDITOR privileges" # <-- Fixed typo here
             }
         else:
             if user["role"] == "ADMIN":

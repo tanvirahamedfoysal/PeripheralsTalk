@@ -13,6 +13,8 @@ connect_args = {"ssl": True} if engine_url.drivername in {"postgresql", "postgre
 engine = create_async_engine(
     settings.database_url,
     echo=True,
+    pool_pre_ping=True,
+    pool_recycle=3600,
     connect_args=connect_args,
 )
 

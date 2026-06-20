@@ -1,7 +1,2 @@
 List of all the API's:
-    Is token valid():  
-
-
-    see profile photo by JWT
-
-    isusername valid()
+    
