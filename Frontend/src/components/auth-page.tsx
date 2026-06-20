@@ -1,5 +1,9 @@
+import Link from "next/link";
+import { Home } from "lucide-react";
+
 import { AuthForm } from "./auth-form";
 import { Brand } from "./brand";
+
 export function AuthPage({ mode }: { mode: "login" | "register" }) {
   return (
     <main className="auth-page">
@@ -27,7 +31,13 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
         </div>
         <div className="palette-strip" />
       </section>
+
       <section className="auth-panel">
+        <Link href="/" className="auth-home-button" aria-label="Go to home page">
+          <Home size={17} />
+          Home
+        </Link>
+
         <div className="auth-form">
           <p className="eyebrow" style={{ color: "var(--red)" }}>
             PeripheralsTalk account

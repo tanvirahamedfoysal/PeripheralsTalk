@@ -1018,13 +1018,74 @@ svg {
 }
 
 .auth-panel {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 50px;
+  padding: 82px 50px 50px;
   border: 1px solid var(--line);
   background: var(--white);
   box-shadow: var(--shadow-sm);
+}
+
+.auth-home-button {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--blush);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.auth-home-button:hover {
+  border-color: var(--aqua);
+  color: var(--teal);
+  transform: translateY(-2px);
+}
+
+.auth-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.auth-text-link {
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.auth-text-link:hover {
+  color: var(--red);
+}
+
+.auth-text-link.strong {
+  font-weight: 800;
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-back-link:hover {
+  color: var(--red);
 }
 
 .auth-form {
@@ -1624,7 +1685,12 @@ svg {
 
   .auth-panel {
     min-height: calc(100vh - 20px);
-    padding: 28px 20px;
+    padding: 88px 20px 32px;
+  }
+
+  .auth-home-button {
+    top: 20px;
+    right: 20px;
   }
 
   .dashboard-layout {

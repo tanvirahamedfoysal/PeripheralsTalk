@@ -14,7 +14,8 @@ export default function Categories() {
           <h1 className="display">All peripherals.</h1>
         </div>
         <p>
-          Browse the fourteen structured categories. Each category has its own specification vocabulary and article
+          Browse the fourteen structured categories defined by the project
+          documentation. Each category has its own specification vocabulary and article
           collection.
         </p>
       </header>
