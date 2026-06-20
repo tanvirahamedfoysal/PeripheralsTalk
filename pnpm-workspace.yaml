@@ -1,11 +1,10 @@
 packages:
   - "Frontend"
 
-allowBuilds:
-  "sharp": true
-  "sharp@0.34.5": true
-  "unrs-resolver": true
-  "unrs-resolver@1.12.2": true
-
 verifyDepsBeforeRun: false
+
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+
 strictDepBuilds: false
