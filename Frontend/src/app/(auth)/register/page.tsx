@@ -1,25 +1,21 @@
-import type { Metadata } from "next";
+import type {
+  Metadata
+} from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { RegisterForm } from "@/features/auth/components/register-form";
-import { getSession } from "@/lib/auth/get-session";
-import { getDefaultRouteForRole } from "@/lib/auth/role-routes";
+import {
+  RegisterForm
+} from "@/features/auth/components/register-form";
 
 export const metadata: Metadata = {
   title: "Register",
-  description: "Create your PeripheralsTalk account."
+  description:
+    "Create a new PeripheralsTalk account."
 };
 
-export default async function RegisterPage(): Promise<React.ReactElement> {
-  const session = await getSession();
-
-  if (session) {
-    redirect(getDefaultRouteForRole(session.user.role));
-  }
-
+export default function RegisterPage(): React.ReactElement {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-[30rem]">
       <Link
         href="/"
         className="eyebrow text-[var(--brand-red)]"
@@ -29,20 +25,21 @@ export default async function RegisterPage(): Promise<React.ReactElement> {
 
       <div className="mt-10">
         <p className="eyebrow text-[var(--text-muted)]">
-          Join the archive
+          Community registration
         </p>
 
-        <h1 className="mt-4 text-5xl leading-[0.95] tracking-[-0.055em] text-[var(--text-primary)]">
-          Create your account.
+        <h1 className="mt-5 text-[clamp(3.5rem,6vw,5.5rem)] leading-[0.88] tracking-[-0.07em]">
+          Join the conversation.
         </h1>
 
-        <p className="mt-5 text-sm leading-7 text-[var(--text-secondary)]">
-          Register to comment, rate peripherals, save bookmarks and
-          request Editor access later.
+        <p className="mt-6 max-w-md text-base leading-8 text-[var(--text-secondary)]">
+          Create an account to comment, reply, rate
+          peripherals, save bookmarks and request Editor
+          access.
         </p>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-9">
         <RegisterForm />
       </div>
     </div>

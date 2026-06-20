@@ -1,42 +1,42 @@
-import type { Metadata } from "next";
+import type {
+  Metadata
+} from "next";
+import {
+  ShieldX
+} from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Account suspended",
-  description: "Your PeripheralsTalk account is suspended."
+  title: "Account suspended"
 };
 
 export default function AccountSuspendedPage(): React.ReactElement {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-[30rem]">
+      <span className="flex size-16 items-center justify-center rounded-full bg-[var(--danger-soft)] text-[var(--danger)]">
+        <ShieldX size={30} aria-hidden="true" />
+      </span>
+
+      <p className="eyebrow mt-9 text-[var(--danger)]">
+        Access unavailable
+      </p>
+
+      <h1 className="mt-5 text-6xl leading-[0.9] tracking-[-0.065em]">
+        Account suspended.
+      </h1>
+
+      <p className="mt-6 text-base leading-8 text-[var(--text-secondary)]">
+        An administrator has suspended this account. You
+        cannot access your dashboard until the account is
+        activated again.
+      </p>
+
       <Link
-        href="/"
-        className="eyebrow text-[var(--brand-red)]"
+        href="/login"
+        className="mt-9 inline-flex h-14 items-center justify-center rounded-full bg-[var(--brand-red)] px-7 font-semibold text-white"
       >
-        PeripheralsTalk
+        Return to login
       </Link>
-
-      <div className="mt-10 rounded-[2rem] border border-[var(--danger)]/20 bg-[var(--danger-soft)] p-8">
-        <p className="eyebrow text-[var(--danger)]">
-          Account suspended
-        </p>
-
-        <h1 className="mt-4 text-5xl leading-[0.95] tracking-[-0.055em] text-[var(--text-primary)]">
-          This account cannot sign in.
-        </h1>
-
-        <p className="mt-5 text-sm leading-7 text-[var(--text-secondary)]">
-          Your account has been suspended by an administrator. Contact
-          the platform owner if you believe this is a mistake.
-        </p>
-
-        <Link
-          href="/login"
-          className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[var(--brand-red)] px-6 font-semibold text-white"
-        >
-          Back to login
-        </Link>
-      </div>
     </div>
   );
 }
