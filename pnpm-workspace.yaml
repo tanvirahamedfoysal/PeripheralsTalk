@@ -1,2 +1,5 @@
-minimumReleaseAgeExclude:
-  - '@types/node@26.0.0'
+packages:
+  - "Frontend"
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
