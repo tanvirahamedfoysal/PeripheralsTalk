@@ -1,61 +1,83 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Mail } from "lucide-react";
+import {
+  zodResolver
+} from "@hookform/resolvers/zod";
+import {
+  ArrowRight,
+  Mail
+} from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import {
+  useForm
+} from "react-hook-form";
 
-import { PasswordField } from "@/features/auth/components/password-field";
-import { useLogin } from "@/features/auth/hooks/use-login";
+import {
+  PasswordField
+} from "@/features/auth/components/password-field";
+import {
+  useLogin
+} from "@/features/auth/hooks/use-login";
 import {
   loginSchema,
-  type LoginSchemaInput
+  type LoginFormValues
 } from "@/features/auth/schemas/auth.schema";
 import { cn } from "@/lib/utils/cn";
 
-export function LoginForm(): React.ReactElement {
-  const loginMutation = useLogin();
+interface LoginFormProps {
+  callbackUrl?: string;
+}
+
+export function LoginForm({
+  callbackUrl
+}: LoginFormProps): React.ReactElement {
+  const loginMutation = useLogin(callbackUrl);
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm<LoginSchemaInput>({
+    formState: {
+      errors
+    }
+  } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+
     defaultValues: {
       email: "",
       password: ""
     }
   });
 
-  function onSubmit(values: LoginSchemaInput): void {
+  function submitLogin(
+    values: LoginFormValues
+  ): void {
     loginMutation.mutate(values);
   }
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="w-full space-y-6"
+      onSubmit={handleSubmit(submitLogin)}
+      className="space-y-6"
       noValidate
     >
       <div className="space-y-2">
         <label
-          htmlFor="email"
-          className="text-sm font-semibold text-[var(--text-primary)]"
+          htmlFor="login-email"
+          className="text-sm font-semibold"
         >
           Email address
         </label>
 
         <div className="relative">
           <input
-            id="email"
+            id="login-email"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="name@example.com"
             aria-invalid={Boolean(errors.email)}
             {...register("email")}
             className={cn(
-              "h-12 w-full rounded-full border bg-white px-5 pr-12 text-sm text-[var(--text-primary)] outline-none transition",
+              "h-14 w-full rounded-full border bg-white px-5 pr-14 text-sm outline-none transition-all",
               "placeholder:text-[var(--text-muted)]",
               "focus:border-[var(--brand-teal)] focus:ring-4 focus:ring-[var(--brand-aqua)]/25",
               errors.email
@@ -65,9 +87,9 @@ export function LoginForm(): React.ReactElement {
           />
 
           <Mail
-            size={18}
+            size={19}
             aria-hidden="true"
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-[var(--text-muted)]"
+            className="absolute top-1/2 right-5 -translate-y-1/2 text-[var(--text-muted)]"
           />
         </div>
 
@@ -81,25 +103,25 @@ export function LoginForm(): React.ReactElement {
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-4">
           <label
-            htmlFor="password"
-            className="text-sm font-semibold text-[var(--text-primary)]"
+            htmlFor="login-password"
+            className="text-sm font-semibold"
           >
             Password
           </label>
 
-          <Link
-            href="/forgot-password"
-            className="text-sm font-semibold text-[var(--brand-red)] hover:underline"
+          <span
+            className="cursor-not-allowed text-sm text-[var(--text-muted)]"
+            title="Password reset API is not implemented in the supplied backend."
           >
             Forgot password?
-          </Link>
+          </span>
         </div>
 
         <PasswordField
-          id="password"
+          id="login-password"
           autoComplete="current-password"
           placeholder="Enter your password"
-          error={Boolean(errors.password)}
+          hasError={Boolean(errors.password)}
           aria-invalid={Boolean(errors.password)}
           {...register("password")}
         />
@@ -114,24 +136,28 @@ export function LoginForm(): React.ReactElement {
       <button
         type="submit"
         disabled={loginMutation.isPending}
-        className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--brand-red)] px-6 font-semibold text-white shadow-card transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
+        className="group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[var(--brand-red)] px-7 font-semibold text-white shadow-card transition-all hover:-translate-y-0.5 hover:shadow-elevated disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loginMutation.isPending ? "Signing in..." : "Sign in"}
+        {loginMutation.isPending
+          ? "Signing in..."
+          : "Sign in"}
 
-        <ArrowRight
-          size={18}
-          aria-hidden="true"
-          className="transition-transform group-hover:translate-x-1"
-        />
+        {!loginMutation.isPending ? (
+          <ArrowRight
+            size={19}
+            aria-hidden="true"
+            className="transition-transform group-hover:translate-x-1"
+          />
+        ) : null}
       </button>
 
       <p className="text-center text-sm text-[var(--text-muted)]">
-        New to PeripheralsTalk?{" "}
+        Do not have an account?{" "}
         <Link
           href="/register"
           className="font-semibold text-[var(--brand-teal)] hover:underline"
         >
-          Create an account
+          Create one
         </Link>
       </p>
     </form>

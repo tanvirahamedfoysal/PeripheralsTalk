@@ -1,40 +1,73 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { authClientApi } from "@/features/auth/api/auth.client";
+import {
+  authClient,
+  AuthClientError
+} from "@/features/auth/api/auth.client";
 import type {
   AuthSuccessResponse,
   LoginInput
-} from "@/features/auth/types/auth.types";
-import { isApiError } from "@/lib/api/api-error";
-import { useSessionContext } from "@/providers/session-provider";
+} from "@/lib/auth/auth.types";
+import {
+  useSessionContext
+} from "@/providers/session-provider";
 
-export function useLogin() {
+function getSafeRedirectUrl(
+  callbackUrl: string | undefined,
+  fallbackUrl: string
+): string {
+  if (
+    callbackUrl &&
+    callbackUrl.startsWith("/") &&
+    !callbackUrl.startsWith("//")
+  ) {
+    return callbackUrl;
+  }
+
+  return fallbackUrl;
+}
+
+export function useLogin(
+  callbackUrl?: string
+) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { setSession } = useSessionContext();
 
-  return useMutation<AuthSuccessResponse, Error, LoginInput>({
-    mutationFn: authClientApi.login,
+  return useMutation<
+    AuthSuccessResponse,
+    Error,
+    LoginInput
+  >({
+    mutationFn: authClient.login,
 
-    onSuccess: (response) => {
+    onSuccess(response) {
       setSession(response.session);
 
       toast.success("Login successful", {
         description: "Welcome back to PeripheralsTalk."
       });
 
-      const callbackUrl = searchParams.get("callbackUrl");
+      router.replace(
+        getSafeRedirectUrl(
+          callbackUrl,
+          response.redirectTo
+        )
+      );
 
-      router.replace(callbackUrl || response.redirectTo);
       router.refresh();
     },
 
-    onError: (error) => {
-      if (isApiError(error)) {
+    onError(error) {
+      if (error instanceof AuthClientError) {
+        if (error.code === "ACCOUNT_SUSPENDED") {
+          router.push("/account-suspended");
+          return;
+        }
+
         toast.error("Login failed", {
           description: error.message
         });
@@ -43,7 +76,8 @@ export function useLogin() {
       }
 
       toast.error("Login failed", {
-        description: "Unable to login right now."
+        description:
+          "An unexpected authentication error occurred."
       });
     }
   });
