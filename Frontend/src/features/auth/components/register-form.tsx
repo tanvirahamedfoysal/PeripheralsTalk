@@ -1,16 +1,27 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Mail, User } from "lucide-react";
+import {
+  zodResolver
+} from "@hookform/resolvers/zod";
+import {
+  ArrowRight,
+  Mail,
+  UserRound
+} from "lucide-react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import {
+  useForm
+} from "react-hook-form";
 
-import { PasswordField } from "@/features/auth/components/password-field";
-import { PasswordStrength } from "@/features/auth/components/password-strength";
-import { useRegister } from "@/features/auth/hooks/use-register";
+import {
+  PasswordField
+} from "@/features/auth/components/password-field";
+import {
+  useRegister
+} from "@/features/auth/hooks/use-register";
 import {
   registerSchema,
-  type RegisterSchemaInput
+  type RegisterFormValues
 } from "@/features/auth/schemas/auth.schema";
 import { cn } from "@/lib/utils/cn";
 
@@ -21,9 +32,12 @@ export function RegisterForm(): React.ReactElement {
     register,
     handleSubmit,
     watch,
-    formState: { errors }
-  } = useForm<RegisterSchemaInput>({
+    formState: {
+      errors
+    }
+  } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+
     defaultValues: {
       name: "",
       email: "",
@@ -34,34 +48,36 @@ export function RegisterForm(): React.ReactElement {
 
   const password = watch("password");
 
-  function onSubmit(values: RegisterSchemaInput): void {
+  function submitRegistration(
+    values: RegisterFormValues
+  ): void {
     registerMutation.mutate(values);
   }
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="w-full space-y-5"
+      onSubmit={handleSubmit(submitRegistration)}
+      className="space-y-5"
       noValidate
     >
       <div className="space-y-2">
         <label
-          htmlFor="name"
-          className="text-sm font-semibold text-[var(--text-primary)]"
+          htmlFor="register-name"
+          className="text-sm font-semibold"
         >
           Full name
         </label>
 
         <div className="relative">
           <input
-            id="name"
+            id="register-name"
             type="text"
             autoComplete="name"
-            placeholder="Md Mahruf Alam"
+            placeholder="Your full name"
             aria-invalid={Boolean(errors.name)}
             {...register("name")}
             className={cn(
-              "h-12 w-full rounded-full border bg-white px-5 pr-12 text-sm text-[var(--text-primary)] outline-none transition",
+              "h-14 w-full rounded-full border bg-white px-5 pr-14 text-sm outline-none transition-all",
               "placeholder:text-[var(--text-muted)]",
               "focus:border-[var(--brand-teal)] focus:ring-4 focus:ring-[var(--brand-aqua)]/25",
               errors.name
@@ -70,10 +86,10 @@ export function RegisterForm(): React.ReactElement {
             )}
           />
 
-          <User
-            size={18}
+          <UserRound
+            size={19}
             aria-hidden="true"
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-[var(--text-muted)]"
+            className="absolute top-1/2 right-5 -translate-y-1/2 text-[var(--text-muted)]"
           />
         </div>
 
@@ -86,22 +102,22 @@ export function RegisterForm(): React.ReactElement {
 
       <div className="space-y-2">
         <label
-          htmlFor="email"
-          className="text-sm font-semibold text-[var(--text-primary)]"
+          htmlFor="register-email"
+          className="text-sm font-semibold"
         >
           Email address
         </label>
 
         <div className="relative">
           <input
-            id="email"
+            id="register-email"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder="name@example.com"
             aria-invalid={Boolean(errors.email)}
             {...register("email")}
             className={cn(
-              "h-12 w-full rounded-full border bg-white px-5 pr-12 text-sm text-[var(--text-primary)] outline-none transition",
+              "h-14 w-full rounded-full border bg-white px-5 pr-14 text-sm outline-none transition-all",
               "placeholder:text-[var(--text-muted)]",
               "focus:border-[var(--brand-teal)] focus:ring-4 focus:ring-[var(--brand-aqua)]/25",
               errors.email
@@ -111,9 +127,9 @@ export function RegisterForm(): React.ReactElement {
           />
 
           <Mail
-            size={18}
+            size={19}
             aria-hidden="true"
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-[var(--text-muted)]"
+            className="absolute top-1/2 right-5 -translate-y-1/2 text-[var(--text-muted)]"
           />
         </div>
 
@@ -126,22 +142,24 @@ export function RegisterForm(): React.ReactElement {
 
       <div className="space-y-2">
         <label
-          htmlFor="password"
-          className="text-sm font-semibold text-[var(--text-primary)]"
+          htmlFor="register-password"
+          className="text-sm font-semibold"
         >
           Password
         </label>
 
         <PasswordField
-          id="password"
+          id="register-password"
           autoComplete="new-password"
-          placeholder="Create a strong password"
-          error={Boolean(errors.password)}
+          placeholder="At least 8 characters"
+          hasError={Boolean(errors.password)}
           aria-invalid={Boolean(errors.password)}
           {...register("password")}
         />
 
-        <PasswordStrength password={password} />
+        <PasswordStrengthIndicator
+          password={password}
+        />
 
         {errors.password ? (
           <p className="text-sm text-[var(--danger)]">
@@ -152,18 +170,20 @@ export function RegisterForm(): React.ReactElement {
 
       <div className="space-y-2">
         <label
-          htmlFor="confirmPassword"
-          className="text-sm font-semibold text-[var(--text-primary)]"
+          htmlFor="register-confirm-password"
+          className="text-sm font-semibold"
         >
           Confirm password
         </label>
 
         <PasswordField
-          id="confirmPassword"
+          id="register-confirm-password"
           autoComplete="new-password"
-          placeholder="Confirm your password"
-          error={Boolean(errors.confirmPassword)}
-          aria-invalid={Boolean(errors.confirmPassword)}
+          placeholder="Enter the password again"
+          hasError={Boolean(errors.confirmPassword)}
+          aria-invalid={Boolean(
+            errors.confirmPassword
+          )}
           {...register("confirmPassword")}
         />
 
@@ -177,21 +197,23 @@ export function RegisterForm(): React.ReactElement {
       <button
         type="submit"
         disabled={registerMutation.isPending}
-        className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--brand-red)] px-6 font-semibold text-white shadow-card transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
+        className="group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[var(--brand-red)] px-7 font-semibold text-white shadow-card transition-all hover:-translate-y-0.5 hover:shadow-elevated disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {registerMutation.isPending
           ? "Creating account..."
           : "Create account"}
 
-        <ArrowRight
-          size={18}
-          aria-hidden="true"
-          className="transition-transform group-hover:translate-x-1"
-        />
+        {!registerMutation.isPending ? (
+          <ArrowRight
+            size={19}
+            aria-hidden="true"
+            className="transition-transform group-hover:translate-x-1"
+          />
+        ) : null}
       </button>
 
       <p className="text-center text-sm text-[var(--text-muted)]">
-        Already have an account?{" "}
+        Already registered?{" "}
         <Link
           href="/login"
           className="font-semibold text-[var(--brand-teal)] hover:underline"
@@ -200,5 +222,69 @@ export function RegisterForm(): React.ReactElement {
         </Link>
       </p>
     </form>
+  );
+}
+
+interface PasswordStrengthIndicatorProps {
+  password: string;
+}
+
+function PasswordStrengthIndicator({
+  password
+}: PasswordStrengthIndicatorProps): React.ReactElement {
+  const strengthChecks = [
+    password.length >= 8,
+    /[a-z]/.test(password),
+    /[A-Z]/.test(password),
+    /[0-9]/.test(password)
+  ];
+
+  const score = strengthChecks.filter(Boolean).length;
+
+  const strengthLabel =
+    score <= 1
+      ? "Weak"
+      : score <= 3
+        ? "Moderate"
+        : "Strong";
+
+  return (
+    <div className="space-y-2 pt-1">
+      <div className="flex gap-1.5">
+        {Array.from({
+          length: 4
+        }).map((_, index) => (
+          <span
+            key={index}
+            className={cn(
+              "h-1.5 flex-1 rounded-full bg-[var(--border)] transition-colors",
+
+              index < score && score <= 1
+                ? "bg-[var(--danger)]"
+                : "",
+
+              index < score &&
+                score > 1 &&
+                score <= 3
+                ? "bg-[var(--warning)]"
+                : "",
+
+              index < score && score === 4
+                ? "bg-[var(--success)]"
+                : ""
+            )}
+          />
+        ))}
+      </div>
+
+      {password ? (
+        <p className="text-xs text-[var(--text-muted)]">
+          Password strength:{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
+            {strengthLabel}
+          </span>
+        </p>
+      ) : null}
+    </div>
   );
 }

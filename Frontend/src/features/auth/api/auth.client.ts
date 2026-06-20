@@ -1,50 +1,110 @@
-import { clientApiRequest } from "@/lib/api/client";
-import { NEXT_API_ENDPOINTS } from "@/lib/api/endpoint-map";
+import {
+  NEXT_AUTH_ENDPOINTS
+} from "@/lib/api/auth-endpoints";
 import type {
   AuthSuccessResponse,
   LoginInput,
   RegisterInput,
-  SessionApiResponse
-} from "@/features/auth/types/auth.types";
+  SessionResponse
+} from "@/lib/auth/auth.types";
 
-export const authClientApi = {
-  login(payload: LoginInput): Promise<AuthSuccessResponse> {
-    return clientApiRequest<AuthSuccessResponse>(
-      NEXT_API_ENDPOINTS.auth.login,
+interface ErrorResponseBody {
+  message?: string;
+  code?: string;
+}
+
+export class AuthClientError extends Error {
+  readonly status: number;
+  readonly code: string | null;
+
+  constructor(
+    message: string,
+    status: number,
+    code: string | null = null
+  ) {
+    super(message);
+
+    this.name = "AuthClientError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function request<TResponse>(
+  url: string,
+  options: RequestInit
+): Promise<TResponse> {
+  const response = await fetch(url, {
+    ...options,
+
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...options.headers
+    }
+  });
+
+  const body = (await response.json()) as
+    | TResponse
+    | ErrorResponseBody;
+
+  if (!response.ok) {
+    const errorBody = body as ErrorResponseBody;
+
+    throw new AuthClientError(
+      errorBody.message ?? "Authentication failed.",
+      response.status,
+      errorBody.code ?? null
+    );
+  }
+
+  return body as TResponse;
+}
+
+export const authClient = {
+  login(
+    input: LoginInput
+  ): Promise<AuthSuccessResponse> {
+    return request<AuthSuccessResponse>(
+      NEXT_AUTH_ENDPOINTS.login,
       {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify(input)
       }
     );
   },
 
-  register(payload: RegisterInput): Promise<AuthSuccessResponse> {
-    const { confirmPassword: _confirmPassword, ...backendPayload } =
-      payload;
-
-    return clientApiRequest<AuthSuccessResponse>(
-      NEXT_API_ENDPOINTS.auth.register,
+  register(
+    input: RegisterInput
+  ): Promise<AuthSuccessResponse> {
+    return request<AuthSuccessResponse>(
+      NEXT_AUTH_ENDPOINTS.register,
       {
         method: "POST",
-        body: JSON.stringify(backendPayload)
+
+        body: JSON.stringify({
+          name: input.name,
+          email: input.email,
+          password: input.password
+        })
+      }
+    );
+  },
+
+  session(): Promise<SessionResponse> {
+    return request<SessionResponse>(
+      NEXT_AUTH_ENDPOINTS.session,
+      {
+        method: "GET"
       }
     );
   },
 
   logout(): Promise<{ message: string }> {
-    return clientApiRequest<{ message: string }>(
-      NEXT_API_ENDPOINTS.auth.logout,
+    return request<{ message: string }>(
+      NEXT_AUTH_ENDPOINTS.logout,
       {
         method: "POST"
-      }
-    );
-  },
-
-  session(): Promise<SessionApiResponse> {
-    return clientApiRequest<SessionApiResponse>(
-      NEXT_API_ENDPOINTS.auth.session,
-      {
-        method: "GET"
       }
     );
   }

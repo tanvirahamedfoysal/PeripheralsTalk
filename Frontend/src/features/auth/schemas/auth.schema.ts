@@ -4,7 +4,7 @@ export const loginSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "Email is required.")
+    .min(1, "Email address is required.")
     .email("Enter a valid email address."),
 
   password: z
@@ -17,31 +17,46 @@ export const registerSchema = z
     name: z
       .string()
       .trim()
-      .min(2, "Name must be at least 2 characters.")
-      .max(80, "Name must be less than 80 characters."),
+      .min(2, "Name must contain at least 2 characters.")
+      .max(80, "Name cannot contain more than 80 characters."),
 
     email: z
       .string()
       .trim()
-      .min(1, "Email is required.")
+      .min(1, "Email address is required.")
       .email("Enter a valid email address."),
 
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters.")
-      .max(128, "Password is too long.")
-      .regex(/[A-Z]/, "Use at least one uppercase letter.")
-      .regex(/[a-z]/, "Use at least one lowercase letter.")
-      .regex(/[0-9]/, "Use at least one number."),
+      .min(8, "Password must contain at least 8 characters.")
+      .max(128, "Password cannot exceed 128 characters."),
 
     confirmPassword: z
       .string()
       .min(1, "Confirm your password.")
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match."
-  });
+  .refine(
+    (values) =>
+      values.password === values.confirmPassword,
+    {
+      path: ["confirmPassword"],
+      message: "The passwords do not match."
+    }
+  );
 
-export type LoginSchemaInput = z.infer<typeof loginSchema>;
-export type RegisterSchemaInput = z.infer<typeof registerSchema>;
+export const registerApiSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  email: z.string().trim().email(),
+  password: z.string().min(8).max(128),
+
+  image_url: z.string().url().nullable().optional(),
+  image_public_id: z.string().nullable().optional()
+});
+
+export type LoginFormValues = z.infer<
+  typeof loginSchema
+>;
+
+export type RegisterFormValues = z.infer<
+  typeof registerSchema
+>;
