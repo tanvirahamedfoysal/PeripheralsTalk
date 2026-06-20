@@ -71,15 +71,6 @@ export function SiteHeader(): React.ReactElement {
       </nav>
 
       <div className="header-actions">
-        <Link
-          className="icon-button"
-          href="/categories"
-          aria-label="Browse categories"
-          title="Browse categories"
-        >
-          <Search size={18} aria-hidden="true" />
-        </Link>
-
         {user ? (
           <Link className="button" href={dashboardHref}>
             <UserRound size={17} aria-hidden="true" />
