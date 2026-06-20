@@ -26,8 +26,7 @@ interface SessionContextValue {
 const SessionContext =
   createContext<SessionContextValue | null>(null);
 
-interface SessionProviderProps
-  extends PropsWithChildren {
+interface SessionProviderProps extends PropsWithChildren {
   initialSession?: AuthSession | null;
 }
 
@@ -38,22 +37,20 @@ export function SessionProvider({
   const [session, setSession] =
     useState<AuthSession | null>(initialSession);
 
-  const contextValue =
-    useMemo<SessionContextValue>(
-      () => ({
-        session,
-        isAuthenticated: session !== null,
-        setSession,
-
-        clearSession() {
-          setSession(null);
-        }
-      }),
-      [session]
-    );
+  const value = useMemo<SessionContextValue>(
+    () => ({
+      session,
+      isAuthenticated: session !== null,
+      setSession,
+      clearSession: () => {
+        setSession(null);
+      }
+    }),
+    [session]
+  );
 
   return (
-    <SessionContext.Provider value={contextValue}>
+    <SessionContext.Provider value={value}>
       {children}
     </SessionContext.Provider>
   );

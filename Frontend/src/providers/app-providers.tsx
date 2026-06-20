@@ -1,7 +1,11 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-import { Toaster } from "sonner";
+import type {
+  PropsWithChildren
+} from "react";
+import {
+  Toaster
+} from "sonner";
 
 import {
   QueryProvider
