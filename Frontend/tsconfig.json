@@ -19,7 +19,7 @@
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noFallthroughCasesInSwitch": true,
     "useUnknownInCatchVariables": true,
     "plugins": [
