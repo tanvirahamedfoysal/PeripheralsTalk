@@ -1,20 +1,20 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import {
   AUTH_COOKIE_NAME,
-  createAuthCookieOptions
+  getDeletedAuthCookieOptions
 } from "@/lib/auth/auth-cookie";
 
 export async function POST(): Promise<NextResponse> {
-  const cookieStore = await cookies();
-
-  cookieStore.set(AUTH_COOKIE_NAME, "", {
-    ...createAuthCookieOptions(),
-    maxAge: 0
-  });
-
-  return NextResponse.json({
+  const response = NextResponse.json({
     message: "Logged out successfully."
   });
+
+  response.cookies.set(
+    AUTH_COOKIE_NAME,
+    "",
+    getDeletedAuthCookieOptions()
+  );
+
+  return response;
 }
