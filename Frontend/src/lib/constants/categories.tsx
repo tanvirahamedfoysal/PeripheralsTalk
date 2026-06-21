@@ -123,19 +123,19 @@ export const peripheralCategories: PeripheralCategory[] = [
   },
   {
     id: 13,
-    slug: "game-controller",
-    name: "Game Controller",
-    summary: "Layouts, connectivity and trigger technology.",
-    specs: ["Layout", "Connectivity", "Hall-effect triggers"],
-    icon: Gamepad2,
-  },
-  {
-    id: 14,
     slug: "usb",
     name: "USB",
     summary: "Version, capacity and form factor.",
     specs: ["Version", "Capacity", "Form factor"],
     icon: Usb,
+  },
+  {
+    id: 14,
+    slug: "game-controller",
+    name: "Game Controller",
+    summary: "Layouts, connectivity and trigger technology.",
+    specs: ["Layout", "Connectivity", "Hall-effect triggers"],
+    icon: Gamepad2,
   },
 ];
 export const getCategory = (idOrSlug: string | number) =>

@@ -1,60 +1,16 @@
-"use client";
-import { useState } from "react";
+import { AdminUsersManager } from "@/components/admin-users-manager";
 import { DashboardPage } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
-  const [id, setId] = useState("1");
+import { requireRole } from "@/lib/auth/guards";
+
+export default async function AdminUsersPage() {
+  const session = await requireRole("ADMIN");
   return (
     <DashboardPage
-      eyebrow="User control"
-      title="Accounts and roles."
-      description="Load users, promote or demote Editors, and suspend or unsuspend accounts."
+      eyebrow="User administration"
+      title="Manage platform users."
+      description="Promote, revoke, suspend, reactivate and reset passwords using the exact Admin routes. The UI prevents self-suspension even though the backend comparison is unreliable."
     >
-      <section className="dashboard-section">
-        <div className="field" style={{ maxWidth: 300 }}>
-          <label className="label">Target user ID</label>
-          <input className="input" value={id} onChange={(e) => setId(e.target.value)} />
-        </div>
-      </section>
-      <ResourceManager
-        title="Load all users"
-        description="Existing profile list endpoint."
-        path={apiPaths.profile.all}
-      />
-      <div className="grid-3">
-        <ResourceManager
-          title="Promote to Editor"
-          description="Admin role action."
-          path={apiPaths.admin.makeEditor(id)}
-          method="POST"
-        />
-        <ResourceManager
-          title="Revoke Editor"
-          description="Demote to User."
-          path={apiPaths.admin.revokeEditor(id)}
-          method="POST"
-        />
-        <ResourceManager
-          title="Suspend user"
-          description="Lock account."
-          path={apiPaths.admin.suspend(id)}
-          method="POST"
-        />
-        <ResourceManager
-          title="Unsuspend user"
-          description="Restore account."
-          path={apiPaths.admin.unsuspend(id)}
-          method="POST"
-        />
-        <ResourceManager
-          title="Reset password"
-          description="Admin password override."
-          path={apiPaths.admin.resetPassword(id)}
-          method="POST"
-          fields={[{ name: "password", label: "New password", type: "password" }]}
-        />
-      </div>
+      <AdminUsersManager currentUserId={session.user.id} />
     </DashboardPage>
   );
 }

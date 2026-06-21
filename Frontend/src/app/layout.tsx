@@ -9,8 +9,7 @@ export const metadata: Metadata = {
     default: "PeripheralsTalk",
     template: "%s | PeripheralsTalk",
   },
-  description:
-    "A structured community knowledge platform for computer peripherals.",
+  description: "A structured community knowledge platform for computer peripherals.",
   icons: {
     icon: [{ url: "/logo.png", type: "image/png" }],
     shortcut: "/logo.png",

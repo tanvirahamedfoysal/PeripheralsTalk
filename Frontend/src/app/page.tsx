@@ -1,11 +1,21 @@
-"use client";
 import Link from "next/link";
 import { ArrowRight, Cpu, Sparkles } from "lucide-react";
+
+import { CategoryGrid } from "@/components/category-grid";
+import { Footer } from "@/components/footer";
 import { PublicShell } from "@/components/public-shell";
 import { SiteHeader } from "@/components/site-header";
-import { Footer } from "@/components/footer";
-import { CategoryGrid } from "@/components/category-grid";
-export default function Home() {
+import { fastApi } from "@/lib/api/server";
+import type { ApiEnvelope, CategoryRecord } from "@/lib/api/types";
+
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const result = await fastApi<ApiEnvelope<CategoryRecord[]>>("category/", {
+    method: "GET",
+  });
+  const categories = result.ok ? result.data.data : undefined;
+
   return (
     <PublicShell>
       <SiteHeader />
@@ -17,19 +27,16 @@ export default function Home() {
             </p>
             <h1 className="display">Understand every device.</h1>
             <p>
-              PeripheralsTalk brings specifications, expert edits and community
-              discussion into one carefully organized archive.
+              PeripheralsTalk connects to the deployed FastAPI service and its
+              Neon-backed data through a secure server proxy—never directly from the
+              browser.
             </p>
           </div>
           <div className="hero-actions">
             <Link className="button red" href="/categories">
               Explore 14 categories <ArrowRight size={18} />
             </Link>
-            <Link
-              className="button ghost"
-              style={{ color: "#fff", borderColor: "rgba(255,255,255,.25)" }}
-              href="/register"
-            >
+            <Link className="button ghost hero-ghost" href="/register">
               Join the community
             </Link>
           </div>
@@ -40,14 +47,15 @@ export default function Home() {
           </div>
           <div className="floating-label">
             <div>
-              <span className="eyebrow muted">Archive system</span>
+              <span className="eyebrow muted">Live platform</span>
               <br />
-              <b>Specifications + discussion</b>
+              <b>FastAPI + Neon PostgreSQL</b>
             </div>
             <Sparkles color="var(--red)" />
           </div>
         </div>
       </section>
+
       <section className="section">
         <div className="section-head">
           <div>
@@ -57,12 +65,19 @@ export default function Home() {
             <h2 className="section-title">Fourteen ways to explore.</h2>
           </div>
           <p>
-            The home sidebar stays compact with recognizable icons. Expand it whenever
-            you need the full category names.
+            The compact sidebar shows all fourteen backend category IDs. Expand it to
+            reveal their full names.
           </p>
         </div>
-        <CategoryGrid />
+        {!result.ok ? (
+          <div className="notice" style={{ marginBottom: 24 }}>
+            The live category list is temporarily unavailable. The documented
+            fourteen-category directory is shown as a safe fallback.
+          </div>
+        ) : null}
+        <CategoryGrid categories={categories} />
       </section>
+
       <section className="feature-band">
         <h2>
           Useful details.

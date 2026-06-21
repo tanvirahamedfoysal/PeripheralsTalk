@@ -1,16 +1,17 @@
 import { DashboardPage } from "@/components/dashboard-page";
-export default function Page() {
+
+export default function EditorModerationPage() {
   return (
     <DashboardPage
-      eyebrow="Moderation"
-      title="Community review."
-      description="The actual api.zip contains report management under strict Admin routes, not Editor routes."
+      eyebrow="Backend boundary"
+      title="Moderation is Admin-only."
+      description="The immutable backend exposes report listing and resolution only under the Admin router. No Editor moderation queue exists."
     >
       <section className="dashboard-section">
+        <h2>No unsupported request is made</h2>
         <div className="notice">
-          No Editor moderation-queue endpoint exists in the supplied API folder. This
-          interface does not call the differently documented endpoint. Admins can use
-          the Reports dashboard backed by /api/v1/admin/all-report.
+          This page intentionally does not call an invented Editor moderation API.
+          Report management remains available in the Admin dashboard only.
         </div>
       </section>
     </DashboardPage>

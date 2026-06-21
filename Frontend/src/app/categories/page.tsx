@@ -1,8 +1,17 @@
+import { CategoryGrid } from "@/components/category-grid";
+import { Footer } from "@/components/footer";
 import { PublicShell } from "@/components/public-shell";
 import { SiteHeader } from "@/components/site-header";
-import { Footer } from "@/components/footer";
-import { CategoryGrid } from "@/components/category-grid";
-export default function Categories() {
+import { fastApi } from "@/lib/api/server";
+import type { ApiEnvelope, CategoryRecord } from "@/lib/api/types";
+
+export const dynamic = "force-dynamic";
+
+export default async function CategoriesPage() {
+  const result = await fastApi<ApiEnvelope<CategoryRecord[]>>("category/", {
+    method: "GET",
+  });
+
   return (
     <PublicShell>
       <SiteHeader />
@@ -14,13 +23,21 @@ export default function Categories() {
           <h1 className="display">All peripherals.</h1>
         </div>
         <p>
-          Browse the fourteen structured categories defined by the project
-          documentation. Each category has its own specification vocabulary and article
-          collection.
+          Category names are loaded from the deployed backend. Specification vocabulary
+          follows the approved project documentation.
         </p>
       </header>
       <section className="section" style={{ paddingTop: 20 }}>
-        <CategoryGrid />
+        {!result.ok ? (
+          <div className="availability-message">
+            <b>Unavailable</b>
+            <p>
+              The live category list could not be loaded. The documented directory
+              remains visible.
+            </p>
+          </div>
+        ) : null}
+        <CategoryGrid categories={result.ok ? result.data.data : undefined} />
       </section>
       <Footer />
     </PublicShell>

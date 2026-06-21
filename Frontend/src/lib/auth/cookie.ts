@@ -1,26 +1,23 @@
-export const AUTH_COOKIE = process.env.AUTH_COOKIE_NAME || "peripheralstalk_session";
-export function cookieOptions(token?: string) {
-  let maxAge = Number(process.env.AUTH_COOKIE_MAX_AGE_SECONDS || 3600);
-  if (token) {
-    try {
-      const part = JSON.parse(
-        Buffer.from(
-          token.split(".")[1]!.replace(/-/g, "+").replace(/_/g, "/"),
-          "base64",
-        ).toString("utf8"),
-      ) as { exp?: number };
-      if (part.exp)
-        maxAge = Math.max(
-          1,
-          Math.min(maxAge, Math.floor(part.exp - Date.now() / 1000)),
-        );
-    } catch {}
-  }
+import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+
+import { decodeJwt } from "./jwt";
+
+export const AUTH_COOKIE =
+  process.env.AUTH_COOKIE_NAME?.trim() || "peripheralstalk_session";
+
+export function cookieOptions(token?: string): Partial<ResponseCookie> {
+  const configuredMaxAge = Number(process.env.AUTH_COOKIE_MAX_AGE_SECONDS || 3600);
+  const exp = token ? decodeJwt(token).exp : undefined;
+  const tokenMaxAge =
+    typeof exp === "number" ? Math.max(1, exp - Math.floor(Date.now() / 1000)) : null;
+
   return {
     httpOnly: true,
-    secure: process.env.AUTH_COOKIE_SECURE === "true",
-    sameSite: "lax" as const,
+    secure:
+      process.env.AUTH_COOKIE_SECURE === "true" ||
+      process.env.NODE_ENV === "production",
+    sameSite: "lax",
     path: "/",
-    maxAge,
+    maxAge: tokenMaxAge ?? configuredMaxAge,
   };
 }

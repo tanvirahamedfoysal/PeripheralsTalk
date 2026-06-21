@@ -1,87 +1,50 @@
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+const rules: Array<{ method: string; pattern: RegExp }> = [
+  { method: "GET", pattern: /^category\/?$/ },
+  { method: "GET", pattern: /^category\/\d+$/ },
+  { method: "POST", pattern: /^category\/?$/ },
+  { method: "PUT", pattern: /^category\/\d+$/ },
+  { method: "DELETE", pattern: /^category\/\d+$/ },
 
-interface AllowedRoute {
-  methods: readonly HttpMethod[];
-  pattern: RegExp;
-}
+  { method: "GET", pattern: /^article\/\d+$/ },
+  { method: "POST", pattern: /^article\/?$/ },
+  { method: "PUT", pattern: /^article\/\d+$/ },
+  { method: "DELETE", pattern: /^article\/\d+$/ },
+  { method: "GET", pattern: /^article\/\d+\/all-articles$/ },
+  { method: "POST", pattern: /^article\/\d+\/make-active\/\d+$/ },
+  { method: "POST", pattern: /^article\/\d+\/rate$/ },
+  { method: "POST", pattern: /^article\/\d+\/toggle-bookmark$/ },
 
-const allowedRoutes: readonly AllowedRoute[] = [
-  {
-    methods: ["POST"],
-    pattern:
-      /^auth\/(register|login|validate-token|request-reset-password|reset-password)\/?$/,
-  },
-  {
-    methods: ["GET", "POST"],
-    pattern: /^category\/?$/,
-  },
-  {
-    methods: ["GET", "PUT", "DELETE"],
-    pattern: /^category\/\d+\/?$/,
-  },
-  {
-    methods: ["GET", "POST", "DELETE"],
-    pattern: /^article\/\d+\/?$/,
-  },
-  {
-    methods: ["GET"],
-    pattern: /^article\/\d+\/all-articles\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^article\/\d+\/make-active\/\d+\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^article\/\d+\/vote\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^article\/toggle_favourite\/\d+\/?$/,
-  },
-  {
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    pattern: /^comment\/\d+\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^comment\/\d+\/(up-vote|down-vote|report)\/?$/,
-  },
-  {
-    methods: ["GET"],
-    pattern: /^profile\/(profile-photo|all)\/?$/,
-  },
-  {
-    methods: ["GET", "PUT", "DELETE"],
-    pattern: /^profile\/me\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^profile\/request-for-editor-access\/?$/,
-  },
-  {
-    methods: ["GET"],
-    pattern: /^admin\/(get-editor-request|all-report)\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern:
-      /^admin\/(make-editor|revoke-editor|suspend-user|unsuspend-user|resolve-report|reset-user-password)\/\d+\/?$/,
-  },
-  {
-    methods: ["GET"],
-    pattern: /^admin\/get-user-by-comment\/\d+\/?$/,
-  },
-  {
-    methods: ["POST"],
-    pattern: /^utility\/upload-image\/?$/,
-  },
+  { method: "GET", pattern: /^comment\/\d+$/ },
+  { method: "POST", pattern: /^comment\/\d+$/ },
+  { method: "POST", pattern: /^comment\/reply\/\d+$/ },
+  { method: "PUT", pattern: /^comment\/\d+$/ },
+  { method: "DELETE", pattern: /^comment\/\d+$/ },
+  { method: "POST", pattern: /^comment\/\d+\/(up-vote|down-vote|report)$/ },
+
+  { method: "GET", pattern: /^profile\/profile-photo$/ },
+  { method: "POST", pattern: /^profile\/validate-username$/ },
+  { method: "GET", pattern: /^profile\/all$/ },
+  { method: "GET", pattern: /^profile\/me$/ },
+  { method: "PUT", pattern: /^profile\/me$/ },
+  { method: "DELETE", pattern: /^profile\/me$/ },
+  { method: "POST", pattern: /^profile\/request-for-editor-access$/ },
+
+  { method: "GET", pattern: /^admin\/get-editor-request$/ },
+  { method: "POST", pattern: /^admin\/make-editor\/\d+$/ },
+  { method: "POST", pattern: /^admin\/revoke-editor\/\d+$/ },
+  { method: "POST", pattern: /^admin\/suspend-user\/\d+$/ },
+  { method: "POST", pattern: /^admin\/unsuspend-user\/\d+$/ },
+  { method: "GET", pattern: /^admin\/all-report$/ },
+  { method: "POST", pattern: /^admin\/resolve-report\/\d+$/ },
+  { method: "GET", pattern: /^admin\/get-user-by-comment\/\d+$/ },
+  { method: "POST", pattern: /^admin\/reset-user-password\/\d+$/ },
+
+  { method: "POST", pattern: /^utility\/upload-image$/ },
 ];
 
-export function isAllowedBackendRequest(method: string, path: string): boolean {
-  const normalizedMethod = method.toUpperCase() as HttpMethod;
-
-  return allowedRoutes.some(
-    (route) => route.methods.includes(normalizedMethod) && route.pattern.test(path),
+export function isAllowedBackendRequest(method: string, rawPath: string): boolean {
+  const path = rawPath.replace(/^\/+|\/+$/g, "");
+  return rules.some(
+    (rule) => rule.method === method.toUpperCase() && rule.pattern.test(path),
   );
 }

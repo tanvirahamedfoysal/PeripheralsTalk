@@ -1,7 +1,9 @@
-nodeLinker: isolated
+packages:
+  - "."
 
+nodeLinker: isolated
 verifyDepsBeforeRun: false
-strictDepBuilds: true
+strictDepBuilds: false
 
 allowBuilds:
   sharp: true

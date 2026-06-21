@@ -1,18 +1,14 @@
+import { ArticleQuickTools } from "@/components/article-quick-tools";
 import { DashboardPage } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
+
+export default function UserBookmarksPage() {
   return (
     <DashboardPage
-      eyebrow="Library"
-      title="Saved peripherals."
-      description="The project documentation assigns personal bookmarks to the profile response, so this page uses only GET /profile/me."
+      eyebrow="Article interaction"
+      title="Bookmarks and ratings."
+      description="The backend can toggle a bookmark or submit a rating for a known article, but it does not expose a personal bookmark-list endpoint."
     >
-      <ResourceManager
-        title="Load profile bookmarks"
-        description="No separate bookmark-list API exists in api.zip."
-        path={apiPaths.profile.me}
-      />
+      <ArticleQuickTools mode="bookmark" />
     </DashboardPage>
   );
 }

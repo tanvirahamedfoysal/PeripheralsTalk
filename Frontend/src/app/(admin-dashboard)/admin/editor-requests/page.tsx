@@ -1,41 +1,14 @@
-"use client";
-import { useState } from "react";
+import { AdminEditorRequests } from "@/components/admin-editor-requests";
 import { DashboardPage } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
-  const [id, setId] = useState("1");
+
+export default function AdminEditorRequestsPage() {
   return (
     <DashboardPage
-      eyebrow="Editor workflow"
-      title="Review Editor requests."
-      description="Load pending requests and approve or revoke Editor status."
+      eyebrow="Role management"
+      title="Editor applications."
+      description="Review submitted applications and promote approved users to Editor. The backend automatically approves pending applications when the role changes."
     >
-      <ResourceManager
-        title="Load Editor requests"
-        description="Exact Admin request queue route."
-        path={apiPaths.admin.editorRequests}
-      />
-      <section className="dashboard-section">
-        <div className="field" style={{ maxWidth: 300 }}>
-          <label className="label">User ID</label>
-          <input className="input" value={id} onChange={(e) => setId(e.target.value)} />
-        </div>
-      </section>
-      <div className="grid-3">
-        <ResourceManager
-          title="Approve request"
-          description="Promote user to Editor."
-          path={apiPaths.admin.makeEditor(id)}
-          method="POST"
-        />
-        <ResourceManager
-          title="Revoke Editor"
-          description="Return Editor to User role."
-          path={apiPaths.admin.revokeEditor(id)}
-          method="POST"
-        />
-      </div>
+      <AdminEditorRequests />
     </DashboardPage>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { CircuitBoard, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { CircuitBoard, PanelLeftOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -17,14 +17,21 @@ export function PeripheralSidebar({
 }: PeripheralSidebarProps): React.ReactElement {
   const pathname = usePathname();
 
-  function toggleSidebar(): void {
-    onExpandedChange(!expanded);
+  function handleBlur(event: React.FocusEvent<HTMLElement>): void {
+    const nextTarget = event.relatedTarget;
+    if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+      onExpandedChange(false);
+    }
   }
 
   return (
     <aside
       className={`peripheral-sidebar${expanded ? " expanded" : ""}`}
       aria-label="Peripheral categories"
+      onMouseEnter={() => onExpandedChange(true)}
+      onMouseLeave={() => onExpandedChange(false)}
+      onFocusCapture={() => onExpandedChange(true)}
+      onBlurCapture={handleBlur}
     >
       <Link href="/" className="side-logo" aria-label="PeripheralsTalk home">
         <span className="logo-icon" aria-hidden="true">
@@ -33,23 +40,10 @@ export function PeripheralSidebar({
         <strong className="side-label">PeripheralsTalk</strong>
       </Link>
 
-      <button
-        type="button"
-        className="side-toggle"
-        onClick={toggleSidebar}
-        aria-expanded={expanded}
-        aria-label={expanded ? "Collapse category sidebar" : "Expand category sidebar"}
-        title={expanded ? "Collapse categories" : "Expand categories"}
-      >
-        {expanded ? (
-          <PanelLeftClose size={20} aria-hidden="true" />
-        ) : (
-          <PanelLeftOpen size={20} aria-hidden="true" />
-        )}
-        <span className="side-label">
-          {expanded ? "Collapse categories" : "Expand categories"}
-        </span>
-      </button>
+      <div className="side-toggle" aria-hidden="true">
+        <PanelLeftOpen size={20} />
+        <span className="side-label">Browse peripheral topics</span>
+      </div>
 
       <nav className="side-list" aria-label="All peripheral categories">
         {peripheralCategories.map((category) => {
@@ -73,7 +67,7 @@ export function PeripheralSidebar({
       </nav>
 
       <div className="side-footer">
-        <span className="side-label">14 structured categories</span>
+        <span className="side-label">14 structured learning topics</span>
       </div>
     </aside>
   );

@@ -1,7 +1,17 @@
 "use client";
+
+import { LoaderCircle, Play } from "lucide-react";
 import { useState } from "react";
-import { apiRequest, type ApiResult } from "@/lib/api/client";
-import { ApiStatus } from "./api-status";
+import { toast } from "sonner";
+
+import { apiRequest } from "@/lib/api/client";
+
+interface FieldDefinition {
+  name: string;
+  label: string;
+  type?: "text" | "textarea" | "number";
+}
+
 export function ResourceManager({
   title,
   description,
@@ -13,70 +23,77 @@ export function ResourceManager({
   description: string;
   path: string;
   method?: "GET" | "POST" | "PUT" | "DELETE";
-  fields?: {
-    name: string;
-    label: string;
-    type?: string;
-    placeholder?: string;
-  }[];
+  fields?: FieldDefinition[];
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
-  const [result, setResult] = useState<ApiResult | null>(null);
+  const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
+
   async function run() {
     setLoading(true);
-    const body =
-      method === "GET" || method === "DELETE" ? undefined : JSON.stringify(values);
-    setResult(await apiRequest(path, { method, body }));
-    setLoading(false);
+    try {
+      const body =
+        fields.length > 0
+          ? Object.fromEntries(
+              fields.map((field) => [field.name, values[field.name] ?? ""]),
+            )
+          : undefined;
+      const response = await apiRequest(path, { method, body });
+      setResult(response);
+      toast.success("Backend request completed.");
+    } catch (error) {
+      setResult({ error: error instanceof Error ? error.message : "Request failed" });
+      toast.error(error instanceof Error ? error.message : "Request failed.");
+    } finally {
+      setLoading(false);
+    }
   }
+
   return (
     <section className="dashboard-section">
-      <div className="toolbar">
-        <div>
-          <h2>{title}</h2>
-          <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-            {description}
-          </p>
+      <h2>{title}</h2>
+      <p className="muted">{description}</p>
+      {fields.map((field) => (
+        <div className="field" key={field.name} style={{ marginTop: 14 }}>
+          <label className="label">{field.label}</label>
+          {field.type === "textarea" ? (
+            <textarea
+              className="textarea"
+              value={values[field.name] ?? ""}
+              onChange={(event) =>
+                setValues((current) => ({
+                  ...current,
+                  [field.name]: event.target.value,
+                }))
+              }
+            />
+          ) : (
+            <input
+              className="input"
+              type={field.type === "number" ? "number" : "text"}
+              value={values[field.name] ?? ""}
+              onChange={(event) =>
+                setValues((current) => ({
+                  ...current,
+                  [field.name]: event.target.value,
+                }))
+              }
+            />
+          )}
         </div>
-        <span className="status">
-          {method} /api/v1/{path}
-        </span>
-      </div>
-      {fields.length > 0 && (
-        <div className="form-grid">
-          {fields.map((f) => (
-            <div className="field" key={f.name}>
-              <label className="label">{f.label}</label>
-              {f.type === "textarea" ? (
-                <textarea
-                  className="textarea"
-                  value={values[f.name] || ""}
-                  onChange={(e) => setValues({ ...values, [f.name]: e.target.value })}
-                  placeholder={f.placeholder}
-                />
-              ) : (
-                <input
-                  className="input"
-                  type={f.type || "text"}
-                  value={values[f.name] || ""}
-                  onChange={(e) => setValues({ ...values, [f.name]: e.target.value })}
-                  placeholder={f.placeholder}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      ))}
       <button
-        className={`button ${method === "DELETE" ? "danger" : ""}`}
-        style={{ marginTop: 16 }}
-        onClick={run}
+        className="button"
+        onClick={() => void run()}
         disabled={loading}
+        style={{ marginTop: 18 }}
       >
-        {loading ? "Working…" : `${method} resource`}
+        {loading ? <LoaderCircle className="spin" size={17} /> : <Play size={17} />}
+        Run supported request
       </button>
-      <ApiStatus result={result} />
+      {result !== null ? (
+        <pre className="response-preview">{JSON.stringify(result, null, 2)}</pre>
+      ) : null}
     </section>
   );
 }

@@ -1,26 +1,62 @@
+import Link from "next/link";
+import { ArrowRight, BookOpen, MessageSquare, UserCog } from "lucide-react";
+
 import { DashboardPage, Metrics } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
+import { requireRole } from "@/lib/auth/guards";
+
+export default async function UserDashboardPage() {
+  const session = await requireRole("USER");
   return (
     <DashboardPage
-      eyebrow="User workspace"
-      title="Your peripheral activity."
-      description="Manage the profile, favourites, comments and Editor-access request supported by the supplied APIs."
+      eyebrow="Community workspace"
+      title={`Welcome, ${session.user.name}.`}
+      description="Manage your profile, request Editor access and interact with known articles through the exact routes provided by the immutable backend."
     >
       <Metrics
         items={[
-          { label: "Role", value: "USER" },
-          { label: "Bookmarks", value: "—" },
-          { label: "Comments", value: "—" },
-          { label: "Ratings", value: "—" },
+          {
+            label: "Role",
+            value: session.user.role,
+            note: "Role embedded in the current JWT",
+          },
+          {
+            label: "Account",
+            value: session.user.isActive ? "Active" : "Suspended",
+            note: session.user.email,
+          },
+          {
+            label: "Username",
+            value: `@${session.user.username}`,
+            note: `User ID ${session.user.id}`,
+          },
         ]}
       />
-      <ResourceManager
-        title="Load account profile"
-        description="Fetches your profile and personal data from the existing backend route."
-        path={apiPaths.profile.me}
-      />
+      <div className="grid-3 dashboard-link-grid">
+        <Link className="dashboard-link-card" href="/dashboard/profile">
+          <UserCog size={25} />
+          <h3>Profile</h3>
+          <p>Update your name, username and profile image.</p>
+          <span>
+            Open <ArrowRight size={15} />
+          </span>
+        </Link>
+        <Link className="dashboard-link-card" href="/dashboard/bookmarks">
+          <BookOpen size={25} />
+          <h3>Article tools</h3>
+          <p>Rate and bookmark a known article ID.</p>
+          <span>
+            Open <ArrowRight size={15} />
+          </span>
+        </Link>
+        <Link className="dashboard-link-card" href="/dashboard/comments">
+          <MessageSquare size={25} />
+          <h3>Discussions</h3>
+          <p>Open an article and join its nested comment thread.</p>
+          <span>
+            Open <ArrowRight size={15} />
+          </span>
+        </Link>
+      </div>
     </DashboardPage>
   );
 }

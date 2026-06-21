@@ -1,55 +1,46 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Home } from "lucide-react";
 
-import { AuthForm } from "./auth-form";
 import { Brand } from "./brand";
+import { AuthForm } from "./auth-form";
 
 export function AuthPage({ mode }: { mode: "login" | "register" }) {
+  const register = mode === "register";
+
   return (
     <main className="auth-page">
       <section className="auth-art">
         <div>
           <Brand light />
-          <p className="eyebrow" style={{ color: "var(--aqua)", marginTop: 55 }}>
-            Knowledge / Community / Hardware
-          </p>
+          <p className="eyebrow auth-art-eyebrow">Knowledge / Community / Hardware</p>
           <h1>
-            {mode === "login"
-              ? "Welcome back to better hardware talk."
-              : "Join the hardware conversation."}
+            {register
+              ? "Join a smarter hardware community."
+              : "Welcome back to focused hardware learning."}
           </h1>
-          <p
-            style={{
-              maxWidth: 580,
-              color: "rgba(255,255,255,.72)",
-              lineHeight: 1.8,
-            }}
-          >
-            Explore structured specifications, share practical experience, vote, rate
-            and help maintain a useful peripheral archive.
+          <p className="auth-art-copy">
+            Explore structured peripheral knowledge, compare article versions, discuss
+            devices and help the community make informed technology choices.
           </p>
         </div>
-        <div className="palette-strip" />
+        <div className="palette-strip" aria-hidden="true" />
       </section>
 
       <section className="auth-panel">
-        <Link href="/" className="auth-home-button" aria-label="Go to home page">
+        <Link href="/" className="auth-home-button">
           <Home size={17} />
           Home
         </Link>
-
-        <div className="auth-form">
-          <p className="eyebrow" style={{ color: "var(--red)" }}>
-            PeripheralsTalk account
-          </p>
-          <h2>{mode === "login" ? "Sign in." : "Create account."}</h2>
-          <p className="muted">
-            {mode === "login"
-              ? "Your role determines the workspace you enter."
-              : "New accounts begin with the User role."}
-          </p>
+        <Suspense
+          fallback={
+            <div className="auth-form">
+              <p className="muted">Loading account form…</p>
+            </div>
+          }
+        >
           <AuthForm mode={mode} />
-        </div>
+        </Suspense>
       </section>
     </main>
   );

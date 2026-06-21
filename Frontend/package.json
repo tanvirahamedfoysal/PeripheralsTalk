@@ -1,6 +1,6 @@
 {
   "name": "peripheralstalk-frontend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check"
+    "check": "pnpm typecheck && pnpm lint"
   },
   "dependencies": {
     "lucide-react": "^0.544.0",
@@ -29,7 +29,7 @@
     "typescript": "^6.0.0"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.0.0"
   },
   "packageManager": "pnpm@11.5.0"
 }

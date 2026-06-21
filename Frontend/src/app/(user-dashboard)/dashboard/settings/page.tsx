@@ -1,29 +1,27 @@
+import Link from "next/link";
+import { KeyRound } from "lucide-react";
+
 import { DashboardPage } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
+import { ProfileManager } from "@/components/profile-manager";
+
+export default function UserSettingsPage() {
   return (
     <DashboardPage
-      eyebrow="Security"
-      title="Account settings."
-      description="Password reset routes are present in api.zip; the current backend implementation remains incomplete."
+      eyebrow="Account settings"
+      title="Security and account."
+      description="Password changes use the backend's email OTP reset flow. Account deletion is a permanent backend SQL delete attempt."
     >
-      <ResourceManager
-        title="Request password reset"
-        description="Calls the supplied test email endpoint."
-        path={apiPaths.auth.requestReset}
-        method="POST"
-      />
-      <ResourceManager
-        title="Reset password"
-        description="Calls the supplied reset endpoint."
-        path={apiPaths.auth.reset}
-        method="POST"
-        fields={[
-          { name: "token", label: "Reset token" },
-          { name: "password", label: "New password", type: "password" },
-        ]}
-      />
+      <section className="dashboard-section">
+        <h2>Password security</h2>
+        <p className="muted">
+          The backend has no authenticated change-password route, so password changes
+          use the supported OTP reset process.
+        </p>
+        <Link className="button" href="/change-password">
+          <KeyRound size={17} /> Change password
+        </Link>
+      </section>
+      <ProfileManager showDangerZone />
     </DashboardPage>
   );
 }

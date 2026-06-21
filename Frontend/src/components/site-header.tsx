@@ -2,54 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { LogIn, Menu, Search, UserRound, X } from "lucide-react";
+import { LogIn, Menu, UserRound, X } from "lucide-react";
+import { useState } from "react";
+
+import { roleHome } from "@/lib/auth/types";
+import { useSession } from "@/providers/session-provider";
 
 import { Brand } from "./brand";
-
-interface HeaderSessionUser {
-  role?: string;
-}
 
 const navigationItems = [
   { href: "/", label: "Home" },
   { href: "/categories", label: "Categories" },
+  { href: "/articles", label: "Articles" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
-export function SiteHeader(): React.ReactElement {
+export function SiteHeader() {
   const pathname = usePathname();
-  const [user, setUser] = useState<HeaderSessionUser | null>(null);
+  const { session, loading } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    fetch("/api/auth/session")
-      .then((response) => response.json())
-      .then((data) => {
-        if (active) {
-          setUser(data.session?.user ?? null);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setUser(null);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const dashboardHref =
-    user?.role === "ADMIN"
-      ? "/admin"
-      : user?.role === "EDITOR"
-        ? "/editor"
-        : "/dashboard";
 
   return (
     <header className="topbar">
@@ -58,43 +30,41 @@ export function SiteHeader(): React.ReactElement {
       </Link>
 
       <nav className="nav" aria-label="Main navigation">
-        {navigationItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={pathname === item.href ? "current" : undefined}
-            aria-current={pathname === item.href ? "page" : undefined}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {navigationItems.map((item) => {
+          const current =
+            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={current ? "current" : undefined}
+              aria-current={current ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="header-actions">
-        {user ? (
-          <Link className="button" href={dashboardHref}>
-            <UserRound size={17} aria-hidden="true" />
-            Dashboard
+        {!loading && session ? (
+          <Link className="button" href={roleHome(session.user.role)}>
+            <UserRound size={17} /> Dashboard
           </Link>
         ) : (
           <Link className="button red" href="/login">
-            <LogIn size={17} aria-hidden="true" />
-            Login
+            <LogIn size={17} /> Login
           </Link>
         )}
 
         <button
           type="button"
           className="icon-button mobile-nav-button"
-          onClick={() => setMobileOpen((current) => !current)}
+          onClick={() => setMobileOpen((value) => !value)}
           aria-expanded={mobileOpen}
-          aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label="Toggle navigation"
         >
-          {mobileOpen ? (
-            <X size={19} aria-hidden="true" />
-          ) : (
-            <Menu size={19} aria-hidden="true" />
-          )}
+          {mobileOpen ? <X size={19} /> : <Menu size={19} />}
         </button>
       </div>
 
@@ -103,12 +73,7 @@ export function SiteHeader(): React.ReactElement {
         aria-label="Mobile navigation"
       >
         {navigationItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={pathname === item.href ? "current" : undefined}
-            onClick={() => setMobileOpen(false)}
-          >
+          <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
             {item.label}
           </Link>
         ))}

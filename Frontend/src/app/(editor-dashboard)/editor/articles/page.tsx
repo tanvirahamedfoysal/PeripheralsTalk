@@ -1,39 +1,14 @@
-"use client";
-import { useState } from "react";
+import { ArticleWorkspace } from "@/components/article-workspace";
 import { DashboardPage } from "@/components/dashboard-page";
-import { ResourceManager } from "@/components/resource-manager";
-import { apiPaths } from "@/lib/api/paths";
-export default function Page() {
-  const [id, setId] = useState("1");
+
+export default function EditorArticlesPage() {
   return (
     <DashboardPage
-      eyebrow="Content"
-      title="Article collection."
-      description="Load category articles and activate a selected article version."
+      eyebrow="Content management"
+      title="Article workspace."
+      description="Editors can create new versions and update a known article record. Listing all versions and activating one are Admin-only backend operations."
     >
-      <section className="dashboard-section">
-        <div className="field" style={{ maxWidth: 300 }}>
-          <label className="label">Category ID</label>
-          <input className="input" value={id} onChange={(e) => setId(e.target.value)} />
-        </div>
-      </section>
-      <ResourceManager
-        title="Load category articles"
-        description="GET all article versions/items for the selected category."
-        path={apiPaths.article.byCategory(id)}
-      />
-      <ResourceManager
-        title="Make article active"
-        description="Activates a chosen article for this category."
-        path={apiPaths.article.makeActive(id, "1")}
-        method="POST"
-        fields={[
-          {
-            name: "article_id",
-            label: "Article ID (update URL manually in backend adapter if needed)",
-          },
-        ]}
-      />
+      <ArticleWorkspace />
     </DashboardPage>
   );
 }

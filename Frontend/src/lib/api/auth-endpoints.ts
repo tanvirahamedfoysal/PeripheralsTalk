@@ -1,12 +1,9 @@
-export const FASTAPI_AUTH_ENDPOINTS = {
-  register: "/auth/register",
-  login: "/auth/login",
-  validateToken: "/auth/validate-token"
-} as const;
-
 export const NEXT_AUTH_ENDPOINTS = {
-  register: "/api/auth/register",
   login: "/api/auth/login",
+  logout: "/api/auth/logout",
   session: "/api/auth/session",
-  logout: "/api/auth/logout"
+  requestRegistrationOtp: "/api/auth/request-registration-otp",
+  register: "/api/auth/register",
+  requestResetPassword: "/api/auth/request-reset-password",
+  resetPassword: "/api/auth/reset-password",
 } as const;

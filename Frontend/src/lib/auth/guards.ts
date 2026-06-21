@@ -1,14 +1,21 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
+
 import { getSession } from "./session";
-import type { AuthSession, UserRole } from "./types";
-import { canAccess } from "./types";
+import { roleHome, type AuthSession, type UserRole } from "./types";
+
 export async function requireAuth(): Promise<AuthSession> {
-  const s = await getSession();
-  if (!s) redirect("/login");
-  return s;
+  const session = await getSession();
+  if (!session) redirect("/login");
+  if (!session.user.isActive) redirect("/account-suspended");
+  return session;
 }
+
 export async function requireRole(role: UserRole): Promise<AuthSession> {
-  const s = await requireAuth();
-  if (!canAccess(s.user.role, role)) redirect("/forbidden");
-  return s;
+  const session = await requireAuth();
+  if (session.user.role !== role) {
+    redirect(roleHome(session.user.role));
+  }
+  return session;
 }
