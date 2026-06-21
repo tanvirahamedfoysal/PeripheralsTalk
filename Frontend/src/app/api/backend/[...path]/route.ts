@@ -17,7 +17,7 @@ async function forward(
     return NextResponse.json(
       {
         detail:
-          "This backend method and endpoint combination is not permitted by the supplied api.zip contract.",
+          "This backend method and endpoints are here",
       },
       { status: 403 },
     );
