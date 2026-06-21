@@ -9,13 +9,12 @@ export default function UserSettingsPage() {
     <DashboardPage
       eyebrow="Account settings"
       title="Security and account."
-      description="Password changes use the backend's email OTP reset flow. Account deletion is a permanent backend SQL delete attempt."
+      description="Protect your account, update your password and review permanent account removal carefully."
     >
       <section className="dashboard-section">
         <h2>Password security</h2>
         <p className="muted">
-          The backend has no authenticated change-password route, so password changes
-          use the supported OTP reset process.
+          Verify your email with a six-digit code before choosing a new password.
         </p>
         <Link className="button" href="/change-password">
           <KeyRound size={17} /> Change password

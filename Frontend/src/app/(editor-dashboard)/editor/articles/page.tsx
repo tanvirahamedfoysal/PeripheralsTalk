@@ -6,7 +6,7 @@ export default function EditorArticlesPage() {
     <DashboardPage
       eyebrow="Content management"
       title="Article workspace."
-      description="Editors can create new versions and update a known article record. Listing all versions and activating one are Admin-only backend operations."
+      description="Create new lessons, improve existing explanations and keep every article accurate, readable and useful."
     >
       <ArticleWorkspace />
     </DashboardPage>

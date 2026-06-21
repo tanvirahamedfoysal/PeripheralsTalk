@@ -6,7 +6,7 @@ export default function AdminCategoriesPage() {
     <DashboardPage
       eyebrow="Peripheral taxonomy"
       title="Manage categories."
-      description="Create, rename and delete peripheral records through FastAPI. Only the category name is stored by this backend."
+      description="Organize the learning directory by creating, renaming and retiring peripheral categories as the curriculum grows."
     >
       <AdminCategoriesManager />
     </DashboardPage>

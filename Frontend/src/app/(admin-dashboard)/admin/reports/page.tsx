@@ -6,7 +6,7 @@ export default function AdminReportsPage() {
     <DashboardPage
       eyebrow="Community safety"
       title="Reports and resolution."
-      description="Inspect reported comments and users, then resolve pending reports using the supplied Admin endpoints."
+      description="Review community concerns, understand their context and resolve each report with a clear decision."
     >
       <AdminReports />
     </DashboardPage>

@@ -4,9 +4,9 @@ import { DashboardPage } from "@/components/dashboard-page";
 export default function AdminDashboardPage() {
   return (
     <DashboardPage
-      eyebrow="Strict Admin workspace"
-      title="Control the platform."
-      description="Manage Neon-backed users, categories, article versions, Editor requests and reports through only the immutable FastAPI endpoints."
+      eyebrow="Administration workspace"
+      title="Guide the learning community."
+      description="Manage members, learning topics, article versions, contributor applications and community reports from one place."
     >
       <AdminOverview />
     </DashboardPage>

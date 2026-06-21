@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { backendErrorMessage, fastApi } from "@/lib/api/server";
+import type { ApiEnvelope, ProfileRecord } from "@/lib/api/types";
 import { AUTH_COOKIE, cookieOptions } from "@/lib/auth/cookie";
 import { decodeJwt } from "@/lib/auth/jwt";
 import { normalizeRole, roleHome } from "@/lib/auth/types";
@@ -61,25 +62,32 @@ export async function POST(request: Request): Promise<NextResponse> {
   const role = normalizeRole(result.data.user.role);
   if (!role) {
     return NextResponse.json(
-      { message: "The backend returned an unsupported user role." },
+      { message: "The account response could not be processed." },
       { status: 502 },
     );
   }
 
   const token = result.data.access_token;
   const jwt = decodeJwt(token);
+  const profileResult = await fastApi<ApiEnvelope<ProfileRecord>>("profile/me", {
+    method: "GET",
+    token,
+    timeoutMs: AUTH_TIMEOUT_MS,
+  });
+  const profile = profileResult.ok ? profileResult.data.data : null;
+
   const response = NextResponse.json({
     message: result.data.message ?? "Login successful",
     redirectTo: roleHome(role),
     session: {
       user: {
-        id: String(result.data.user.id ?? jwt.id ?? ""),
-        name: result.data.user.username,
-        username: result.data.user.username,
-        email: result.data.user.email,
+        id: String(profile?.id ?? result.data.user.id ?? jwt.id ?? ""),
+        name: profile?.name ?? result.data.user.username,
+        username: profile?.username ?? result.data.user.username,
+        email: profile?.email ?? result.data.user.email,
         role,
-        isActive: true,
-        avatarUrl: null,
+        isActive: profile?.is_active ?? true,
+        avatarUrl: profile?.image_url ?? null,
       },
       expiresAt:
         typeof jwt.exp === "number" ? new Date(jwt.exp * 1000).toISOString() : null,

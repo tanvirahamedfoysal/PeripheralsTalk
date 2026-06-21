@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Database, Layers3 } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, Layers3 } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Footer } from "@/components/footer";
@@ -56,7 +56,7 @@ export default async function CategoryPage({
               <Layers3 size={17} /> Documented category
             </span>
             <span>
-              <Database size={17} /> Neon-backed content
+              <BookOpenCheck size={17} /> Guided learning content
             </span>
           </div>
         </aside>
@@ -110,8 +110,8 @@ export default async function CategoryPage({
                 )}
               </p>
               <small className="muted">
-                The backend returns the same 404 response when a category exists but has
-                no active article version.
+                Check again later or explore another category from the learning
+                directory.
               </small>
             </div>
           )}

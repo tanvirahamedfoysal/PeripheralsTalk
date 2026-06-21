@@ -10,14 +10,14 @@ export default async function UserDashboardPage() {
     <DashboardPage
       eyebrow="Community workspace"
       title={`Welcome, ${session.user.name}.`}
-      description="Manage your profile, request Editor access and interact with known articles through the exact routes provided by the immutable backend."
+      description="Manage your learning profile, participate in discussions and take the next step toward becoming a contributor."
     >
       <Metrics
         items={[
           {
             label: "Role",
             value: session.user.role,
-            note: "Role embedded in the current JWT",
+            note: "Your current community access level",
           },
           {
             label: "Account",

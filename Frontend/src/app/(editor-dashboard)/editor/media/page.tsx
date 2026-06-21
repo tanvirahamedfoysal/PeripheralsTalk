@@ -4,9 +4,9 @@ import { MediaUploader } from "@/components/media-uploader";
 export default function EditorMediaPage() {
   return (
     <DashboardPage
-      eyebrow="Cloud media"
+      eyebrow="Learning media"
       title="Upload article images."
-      description="Uploads are sent as multipart form data to the existing FastAPI Cloudinary endpoint."
+      description="Add clear, relevant images that make technical ideas easier for learners to understand."
     >
       <MediaUploader />
     </DashboardPage>

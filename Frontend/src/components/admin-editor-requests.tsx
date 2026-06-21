@@ -112,9 +112,8 @@ export function AdminEditorRequests() {
       </div>
 
       <div className="notice" style={{ marginTop: 24 }}>
-        The immutable backend has an approval endpoint but no endpoint for explicitly
-        rejecting an Editor application. This frontend therefore does not invent a
-        rejection action.
+        Approve applicants who demonstrate subject knowledge, clear communication and a
+        constructive approach to community learning.
       </div>
     </section>
   );

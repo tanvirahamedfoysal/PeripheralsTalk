@@ -10,8 +10,8 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
 
   return (
     <main className="auth-page">
-      <section className="auth-art">
-        <div>
+      <section className="auth-art auth-study-image">
+        <div className="auth-art-content">
           <Brand light />
           <p className="eyebrow auth-art-eyebrow">Knowledge / Community / Hardware</p>
           <h1>
@@ -24,7 +24,6 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             devices and help the community make informed technology choices.
           </p>
         </div>
-        <div className="palette-strip" aria-hidden="true" />
       </section>
 
       <section className="auth-panel">

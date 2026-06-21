@@ -30,9 +30,8 @@ export default function ArticlesIndexPage() {
           </p>
           <h1 className="section-title">Open an article by ID.</h1>
           <p className="muted">
-            The immutable backend does not provide a public article-feed or search
-            endpoint. Use a known article ID, or browse active category content from the
-            category directory.
+            Enter a known article ID to open it directly, or browse the category
+            directory to discover active learning content.
           </p>
           <form onSubmit={submit} className="article-id-form">
             <input

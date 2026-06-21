@@ -195,8 +195,8 @@ export function ProfileManager({
           </p>
           <h2>Delete account permanently</h2>
           <p className="muted">
-            The backend performs a hard SQL delete, not a reversible deactivation. It
-            can fail when your records are referenced by comments, ratings or bookmarks.
+            This action permanently removes your account and cannot be undone. Review
+            your decision carefully before continuing.
           </p>
           <div className="danger-confirm-row">
             <input

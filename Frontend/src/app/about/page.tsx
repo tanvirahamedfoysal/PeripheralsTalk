@@ -40,8 +40,8 @@ export default function About() {
             <ShieldCheck size={32} color="var(--success)" />
             <h2>Role accountability</h2>
             <p className="muted">
-              JWT-based roles separate user participation, editorial work and strict
-              administrative control.
+              Clear community roles keep participation, editorial work and platform
+              administration organized and accountable.
             </p>
           </div>
         </div>

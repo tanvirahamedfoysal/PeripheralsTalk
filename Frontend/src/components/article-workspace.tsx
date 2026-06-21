@@ -272,8 +272,8 @@ export function ArticleWorkspace({
               required
             />
             <small className="muted">
-              The backend stores only the article content and version metadata. It does
-              not have title, thumbnail, tags, excerpt or specification JSON columns.
+              Write clear, well-structured content with useful headings, examples and
+              practical explanations.
             </small>
           </div>
           <div className="actions">

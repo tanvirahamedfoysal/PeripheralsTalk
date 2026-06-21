@@ -23,8 +23,8 @@ export default async function CategoriesPage() {
           <h1 className="display">All peripherals.</h1>
         </div>
         <p>
-          Category names are loaded from the deployed backend. Specification vocabulary
-          follows the approved project documentation.
+          Choose a topic to learn its essential terms, compare important features and
+          continue into detailed lessons.
         </p>
       </header>
       <section className="section" style={{ paddingTop: 20 }}>

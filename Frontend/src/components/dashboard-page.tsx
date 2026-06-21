@@ -34,7 +34,7 @@ export function Metrics({
           <span className="eyebrow muted">{i.label}</span>
           <div className="value">{i.value}</div>
           <small className="muted">
-            {i.note || "Connected when backend data is available"}
+            {i.note || "Updated as new information becomes available"}
           </small>
         </div>
       ))}

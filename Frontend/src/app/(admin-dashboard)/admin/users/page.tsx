@@ -8,7 +8,7 @@ export default async function AdminUsersPage() {
     <DashboardPage
       eyebrow="User administration"
       title="Manage platform users."
-      description="Promote, revoke, suspend, reactivate and reset passwords using the exact Admin routes. The UI prevents self-suspension even though the backend comparison is unreliable."
+      description="Manage member access, contributor roles, account status and password assistance with clear administrative controls."
     >
       <AdminUsersManager currentUserId={session.user.id} />
     </DashboardPage>

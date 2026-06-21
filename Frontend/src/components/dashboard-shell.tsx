@@ -38,7 +38,7 @@ const navs: Record<UserRole, { href: string; label: string; icon: typeof Home }[
     { href: "/editor/articles", label: "Articles", icon: BookOpen },
     { href: "/editor/articles/new", label: "Write article", icon: FilePlus2 },
     { href: "/editor/media", label: "Media", icon: FolderKanban },
-    { href: "/editor/moderation", label: "Backend limits", icon: Flag },
+    { href: "/editor/moderation", label: "Community standards", icon: Flag },
     { href: "/editor/settings", label: "Settings", icon: Settings },
   ],
   ADMIN: [

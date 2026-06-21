@@ -6,7 +6,7 @@ export default function EditorRequestPage() {
     <DashboardPage
       eyebrow="Role progression"
       title="Become an Editor."
-      description="Submit one pending application for Admin review. Role changes require a fresh login because the role is also stored in the JWT."
+      description="Tell the review team how you would contribute and submit your application for editorial access."
     >
       <EditorRequestForm />
     </DashboardPage>

@@ -4,7 +4,7 @@ export default function ResetPasswordPage() {
   return (
     <PasswordRecoveryPage
       title="Reset your password."
-      description="Use the OTP sent to your email. The backend accepts the OTP for two minutes."
+      description="Enter the six-digit code sent to your email before it expires, then choose your new password."
     />
   );
 }

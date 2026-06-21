@@ -180,14 +180,13 @@ export function PasswordRecoveryPage({
 
   return (
     <main className="auth-page">
-      <section className="auth-art">
-        <div>
+      <section className="auth-art auth-study-image">
+        <div className="auth-art-content">
           <Brand light />
           <p className="eyebrow auth-art-eyebrow">Secure account recovery</p>
           <h1>{title}</h1>
           <p className="auth-art-copy">{description}</p>
         </div>
-        <div className="palette-strip" aria-hidden="true" />
       </section>
 
       <section className="auth-panel">
@@ -241,7 +240,7 @@ export function PasswordRecoveryPage({
                   </strong>
                   <span>
                     {countdown.secondsLeft > 0
-                      ? "Use the code before the backend's two-minute limit ends."
+                      ? "Use the code before the two-minute timer ends."
                       : "Request a new OTP before resetting the password."}
                   </span>
                 </div>

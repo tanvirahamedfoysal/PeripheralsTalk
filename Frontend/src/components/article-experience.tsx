@@ -121,7 +121,7 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
     return (
       <div className="loading-panel">
         <LoaderCircle className="spin" size={28} /> Loading article from the cloud
-        backend…
+        article…
       </div>
     );
   }
@@ -133,7 +133,7 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
         <h1 className="section-title" style={{ marginTop: 18 }}>
           Article could not be loaded.
         </h1>
-        <p className="muted">{error ?? "The backend returned no article data."}</p>
+        <p className="muted">{error ?? "No article content is available right now."}</p>
         <Link className="button" href="/articles">
           Try another article ID
         </Link>

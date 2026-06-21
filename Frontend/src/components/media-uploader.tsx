@@ -26,7 +26,7 @@ export function MediaUploader() {
         { method: "POST", body: form },
       );
       setResult(response);
-      toast.success("Image uploaded to Cloudinary.");
+      toast.success("Image uploaded successfully.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
@@ -43,10 +43,10 @@ export function MediaUploader() {
     <section className="dashboard-section">
       <div className="toolbar">
         <div>
-          <h2>Cloudinary media upload</h2>
+          <h2>Learning media upload</h2>
           <p className="muted">
-            The backend accepts multipart form data using the field name{" "}
-            <code>file</code>.
+            Choose a clear image that supports the lesson and helps learners understand
+            the topic.
           </p>
         </div>
         <ImageUp size={28} color="var(--teal)" />
@@ -56,7 +56,7 @@ export function MediaUploader() {
           <ImageUp size={32} />
           <b>{file ? file.name : "Choose an image"}</b>
           <span className="muted">
-            PNG, JPG, WEBP or another image format accepted by the backend uploader
+            PNG, JPG or WEBP. Use a clear, relevant image with readable details
           </span>
           <input
             type="file"
@@ -85,7 +85,7 @@ export function MediaUploader() {
             className="uploaded-preview"
           />
           <div className="field">
-            <label className="label">URL</label>
+            <label className="label">Image link</label>
             <div className="input-action-row">
               <input className="input" readOnly value={result.url} />
               <button className="icon-button" onClick={() => void copy(result.url)}>
@@ -94,7 +94,7 @@ export function MediaUploader() {
             </div>
           </div>
           <div className="field">
-            <label className="label">Public ID</label>
+            <label className="label">Media reference</label>
             <div className="input-action-row">
               <input className="input" readOnly value={result.public_id} />
               <button

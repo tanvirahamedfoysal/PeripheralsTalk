@@ -6,7 +6,7 @@ export default function NewEditorArticlePage() {
     <DashboardPage
       eyebrow="New content"
       title="Create an article version."
-      description="A newly created article version is inactive until an Admin activates it for the selected peripheral."
+      description="Create a clear new lesson for a peripheral topic and prepare it for publication review."
     >
       <ArticleWorkspace createOnly />
     </DashboardPage>

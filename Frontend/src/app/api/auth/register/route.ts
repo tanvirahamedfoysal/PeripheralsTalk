@@ -68,7 +68,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const role = normalizeRole(result.data.user.role);
   if (!role) {
     return NextResponse.json(
-      { message: "The backend returned an unsupported user role." },
+      { message: "The account response could not be processed." },
       { status: 502 },
     );
   }

@@ -84,8 +84,8 @@ export async function fastApi<T>(
   } catch (error) {
     const detail =
       error instanceof Error && error.name === "AbortError"
-        ? `The FastAPI request timed out after ${Math.round(timeoutMs / 1000)} seconds.`
-        : "Unable to reach the deployed FastAPI backend.";
+        ? `The request timed out after ${Math.round(timeoutMs / 1000)} seconds.`
+        : "The service is temporarily unavailable.";
 
     return {
       ok: false,
@@ -99,7 +99,7 @@ export async function fastApi<T>(
 
 export function backendErrorMessage(
   payload: BackendErrorPayload | unknown,
-  fallback = "The backend request failed.",
+  fallback = "The request could not be completed.",
 ): string {
   if (typeof payload === "string" && payload.trim()) {
     return payload.trim();

@@ -70,6 +70,7 @@ export async function apiRequest<T>(
     method: options.method ?? "GET",
     headers,
     body,
+    credentials: "same-origin",
     cache: "no-store",
   });
 

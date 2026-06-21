@@ -94,7 +94,7 @@ export function AdminUsersManager({ currentUserId }: { currentUserId: string }) 
       }>(apiPaths.admin.resetPassword(user.id), { method: "POST" });
 
       if (!response.data?.new_password) {
-        throw new Error("The backend did not return the generated password.");
+        throw new Error("A new password could not be generated.");
       }
 
       setGeneratedPassword({
@@ -120,7 +120,7 @@ export function AdminUsersManager({ currentUserId }: { currentUserId: string }) 
       <div className="toolbar">
         <div>
           <p className="eyebrow" style={{ color: "var(--red)" }}>
-            Neon user records
+            Community members
           </p>
           <h2>Registered users</h2>
         </div>

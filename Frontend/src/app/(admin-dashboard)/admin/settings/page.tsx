@@ -9,7 +9,7 @@ export default function AdminSettingsPage() {
     <DashboardPage
       eyebrow="Administration"
       title="Profile and security."
-      description="Update the current Admin profile and use the backend-supported OTP password reset process."
+      description="Keep your administrator profile accurate and protect your account with secure password recovery."
     >
       <section className="dashboard-section">
         <h2>Password security</h2>

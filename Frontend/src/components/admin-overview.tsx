@@ -64,12 +64,12 @@ export function AdminOverview() {
           {
             label: "Users",
             value: state.users === null ? "—" : String(state.users),
-            note: "Derived from the Admin user-list endpoint",
+            note: "Registered community members",
           },
           {
             label: "Categories",
             value: state.categories === null ? "—" : String(state.categories),
-            note: "Live peripheral records",
+            note: "Topics in the learning directory",
           },
           {
             label: "Reports",
@@ -89,10 +89,10 @@ export function AdminOverview() {
       <section className="dashboard-section">
         <div className="toolbar">
           <div>
-            <h2>Dashboard data source</h2>
+            <h2>Community overview</h2>
             <p className="muted">
-              The backend has no analytics endpoint. These totals are calculated from
-              existing read endpoints without inventing any API.
+              Use these totals to understand current membership, learning topics,
+              contributor applications and community reports.
             </p>
           </div>
           <button

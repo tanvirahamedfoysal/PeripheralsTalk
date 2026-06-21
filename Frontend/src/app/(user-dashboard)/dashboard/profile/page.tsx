@@ -6,7 +6,7 @@ export default function UserProfilePage() {
     <DashboardPage
       eyebrow="Account"
       title="Your profile."
-      description="Profile information is loaded from and saved to the Neon-backed user record through FastAPI."
+      description="Keep your name, username and profile image up to date so the community can recognize your contributions."
     >
       <ProfileManager />
     </DashboardPage>

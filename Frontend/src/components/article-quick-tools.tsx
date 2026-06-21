@@ -38,8 +38,8 @@ export function ArticleQuickTools({ mode }: { mode: "bookmark" | "discussion" })
           <h2>{mode === "bookmark" ? "Bookmark an article" : "Open a discussion"}</h2>
           <p className="muted">
             {mode === "bookmark"
-              ? "The backend supports toggling a bookmark but has no endpoint for listing a user's saved articles."
-              : "The backend has no personal-comment history endpoint. Open a known article to view and join its discussion."}
+              ? "Enter an article ID to add or remove it from your saved learning list."
+              : "Open a known article to read the discussion, reply to other learners and share your perspective."}
           </p>
         </div>
         {mode === "bookmark" ? (

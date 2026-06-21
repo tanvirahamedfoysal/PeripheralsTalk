@@ -6,7 +6,7 @@ export default function UserBookmarksPage() {
     <DashboardPage
       eyebrow="Article interaction"
       title="Bookmarks and ratings."
-      description="The backend can toggle a bookmark or submit a rating for a known article, but it does not expose a personal bookmark-list endpoint."
+      description="Save useful articles for later and rate lessons after you have explored their content."
     >
       <ArticleQuickTools mode="bookmark" />
     </DashboardPage>

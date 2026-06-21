@@ -1,84 +1,48 @@
-# PeripheralsTalk Frontend — Cloud Backend Build
+# PeripheralsTalk Frontend — Study Image, Palette and Write-API Fix
 
-A production-ready Next.js 16 frontend for the immutable PeripheralsTalk FastAPI backend.
+This package is the complete Next.js frontend for the immutable PeripheralsTalk
+FastAPI backend.
 
-## Architecture
+## Required image
+
+Add your learning image here before starting the frontend:
 
 ```text
-Browser
-  -> Next.js route handlers and protected pages
-  -> https://peripheralstalk-106b064b.fastapicloud.dev/api/v1
-  -> FastAPI / SQLAlchemy
-  -> Neon PostgreSQL
+public/study.jpg
 ```
 
-The browser does not receive the Neon connection string and never connects to the database directly.
+The home hero and all authentication/recovery pages use this image. The CSS
+contains a graceful color fallback, so the app still renders if the image has
+not been copied yet.
 
-## Visual system
+## Current palette
 
-The interface uses the supplied palette:
+- Deep evergreen: `#07332C`
+- Academic green: `#485B46`
+- Soft sage: `#AFB7AC`
+- Warm gold: `#BCA879`
+- Cloud gray: `#E0DEDD`
 
-- Forest: `#405539`
-- Sage: `#5F7052`
-- Sand: `#B6A281`
-- Clay: `#77594E`
+## Main fixes
 
-The typography uses a professional educational hierarchy:
+- Replaced the striped/flag-style illustrations with `public/study.jpg`.
+- Applied a clean modern sans-serif typography system.
+- Added a 1.5-second delayed close to the profile dropdown.
+- Smoothed the 14-category sidebar expansion and collapse.
+- Preserved trailing slashes for FastAPI collection write routes.
+- Fixed category creation and article-version creation proxy forwarding.
+- Increased normal backend request timeout to 60 seconds.
+- Kept JWT forwarding through the secure server-side proxy.
+- Preserved all existing role-based dashboards and authentication flows.
 
-- Editorial serif headings using system-installed Charter/Palatino/Georgia fallbacks
-- Clean Aptos/Segoe UI sans-serif body and navigation text
-- Larger, clearer navigation with deliberate bold and regular weights
+## Install
 
-## Authentication implemented
-
-- OAuth2 form-encoded login using the backend's `username` field
-- Login by either email or username
-- JWT stored in an HttpOnly cookie
-- Bearer-token validation through the backend
-- Registration OTP request
-- Registration with name, username, email, password and OTP
-- Two-minute OTP countdown
-- OTP expiry detection and resend action
-- Password-reset OTP countdown and resend action
-- Role redirects for `ADMIN`, `EDITOR` and `USER`
-- Suspended-account handling
-
-## Sidebar behavior
-
-On desktop, the 14-category rail:
-
-- remains collapsed while idle
-- expands automatically when hovered or keyboard-focused
-- collapses automatically after the pointer or focus leaves
-- remains a horizontal mobile category rail on small screens
-
-## Environment
-
-The included `.env.local` and `.env.example` use:
-
-```env
-FASTAPI_BASE_URL=https://peripheralstalk-106b064b.fastapicloud.dev
-FASTAPI_API_PREFIX=/api/v1
-FASTAPI_REQUEST_TIMEOUT_MS=30000
-FASTAPI_AUTH_TIMEOUT_MS=90000
-
-AUTH_COOKIE_NAME=peripheralstalk_session
-AUTH_COOKIE_SECURE=false
-AUTH_COOKIE_MAX_AGE_SECONDS=3600
-```
-
-`AUTH_COOKIE_SECURE` is automatically treated as secure by the code when running a production build.
-
-## Install and run
-
-Copy the ZIP contents directly into your existing `Frontend` directory. Then run:
+Copy everything into your existing `Frontend` directory, then run:
 
 ```powershell
 cd D:\PROJ\PeripheralsTalk\Frontend
 
 Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
-
 pnpm install
 pnpm run dev
 ```
@@ -89,16 +53,23 @@ Open:
 http://localhost:3000
 ```
 
-## Verification commands
+## Environment
+
+The included `.env.local` points to:
+
+```text
+https://peripheralstalk-106b064b.fastapicloud.dev/api/v1
+```
+
+The browser does not connect directly to Neon. Requests go through the Next.js
+server proxy, which attaches the HttpOnly JWT cookie to protected FastAPI
+requests.
+
+## Quality commands
 
 ```powershell
+pnpm format:check
 pnpm typecheck
 pnpm lint
 pnpm build
 ```
-
-## Important backend boundary
-
-The frontend only calls routes implemented by the uploaded backend. It does not invent search, trending, public feed, analytics, contact submission, refresh-token or backend logout endpoints.
-
-If the backend returns `Failed to send OTP email`, the frontend now displays that exact server response. That specific failure must be resolved in the deployed FastAPI/Brevo configuration because a browser interface cannot send the backend's OTP email itself.

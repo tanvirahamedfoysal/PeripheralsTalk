@@ -4,20 +4,21 @@ import { ArrowRight, FilePlus2, FolderKanban, Pencil } from "lucide-react";
 import { DashboardPage, Metrics } from "@/components/dashboard-page";
 import { requireRole } from "@/lib/auth/guards";
 
-export default async function EditorDashboardPage() {
+export default async function EditorDashboardPage(): Promise<React.ReactElement> {
   const session = await requireRole("EDITOR");
+
   return (
     <DashboardPage
       eyebrow="Editor workspace"
       title="Publish reliable knowledge."
-      description="Create new article versions, update known article IDs and upload media through the exact Editor-compatible backend routes."
+      description="Create clear lessons, refine existing articles and help learners understand technical ideas with confidence."
     >
       <Metrics
         items={[
           {
             label: "Role",
             value: "EDITOR",
-            note: "Editor JWT required for article writes",
+            note: "Create and improve learning content",
           },
           {
             label: "Account",
@@ -25,33 +26,36 @@ export default async function EditorDashboardPage() {
             note: session.user.email,
           },
           {
-            label: "Moderation",
-            value: "Admin-only",
-            note: "The backend has no Editor moderation route",
+            label: "Editorial focus",
+            value: "Clarity first",
+            note: "Make every explanation useful and easy to follow",
           },
         ]}
       />
+
       <div className="grid-3 dashboard-link-grid">
         <Link className="dashboard-link-card" href="/editor/articles/new">
           <FilePlus2 size={25} />
-          <h3>New version</h3>
-          <p>Create a new inactive article version.</p>
+          <h3>New lesson</h3>
+          <p>Draft a focused explanation for a peripheral topic.</p>
           <span>
             Write <ArrowRight size={15} />
           </span>
         </Link>
+
         <Link className="dashboard-link-card" href="/editor/articles">
           <Pencil size={25} />
-          <h3>Edit article</h3>
-          <p>Load and update an existing article ID.</p>
+          <h3>Improve an article</h3>
+          <p>Refine examples, explanations and supporting details.</p>
           <span>
             Edit <ArrowRight size={15} />
           </span>
         </Link>
+
         <Link className="dashboard-link-card" href="/editor/media">
           <FolderKanban size={25} />
-          <h3>Media upload</h3>
-          <p>Upload images to Cloudinary through FastAPI.</p>
+          <h3>Learning media</h3>
+          <p>Add helpful visuals that make difficult ideas easier to understand.</p>
           <span>
             Upload <ArrowRight size={15} />
           </span>

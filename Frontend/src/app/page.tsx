@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Cpu, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenCheck } from "lucide-react";
 
 import { CategoryGrid } from "@/components/category-grid";
 import { Footer } from "@/components/footer";
@@ -10,7 +10,7 @@ import type { ApiEnvelope, CategoryRecord } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function HomePage(): Promise<React.ReactElement> {
   const result = await fastApi<ApiEnvelope<CategoryRecord[]>>("category/", {
     method: "GET",
   });
@@ -22,14 +22,14 @@ export default async function HomePage() {
       <section className="hero">
         <div className="hero-copy">
           <div>
-            <p className="eyebrow" style={{ color: "var(--aqua)" }}>
-              Structured hardware knowledge
+            <p className="eyebrow" style={{ color: "var(--sand)" }}>
+              Learn computer peripherals with confidence
             </p>
             <h1 className="display">Understand every device.</h1>
             <p>
-              PeripheralsTalk connects to the deployed FastAPI service and its
-              Neon-backed data through a secure server proxy—never directly from the
-              browser.
+              Build practical knowledge through clear lessons, focused explanations and
+              community discussion designed to make complex hardware easier to
+              understand.
             </p>
           </div>
           <div className="hero-actions">
@@ -41,17 +41,18 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="hero-visual">
-          <div className="orb">
-            <Cpu size={92} strokeWidth={1} />
-          </div>
+
+        <div
+          className="hero-visual hero-study-image"
+          aria-label="Students learning together"
+        >
           <div className="floating-label">
             <div>
-              <span className="eyebrow muted">Live platform</span>
+              <span className="eyebrow muted">Guided learning</span>
               <br />
-              <b>FastAPI + Neon PostgreSQL</b>
+              <b>Explore. Compare. Discuss.</b>
             </div>
-            <Sparkles color="var(--red)" />
+            <BookOpenCheck color="var(--sand)" />
           </div>
         </div>
       </section>
@@ -59,33 +60,35 @@ export default async function HomePage() {
       <section className="section">
         <div className="section-head">
           <div>
-            <p className="eyebrow" style={{ color: "var(--red)" }}>
+            <p className="eyebrow" style={{ color: "var(--sand)" }}>
               Peripheral directory
             </p>
             <h2 className="section-title">Fourteen ways to explore.</h2>
           </div>
           <p>
-            The compact sidebar shows all fourteen backend category IDs. Expand it to
-            reveal their full names.
+            Start with a category, learn the essential concepts and continue into
+            detailed articles and community discussions at your own pace.
           </p>
         </div>
+
         {!result.ok ? (
           <div className="notice" style={{ marginBottom: 24 }}>
-            The live category list is temporarily unavailable. The documented
-            fourteen-category directory is shown as a safe fallback.
+            The category list is temporarily unavailable. You can still browse the
+            complete learning directory below.
           </div>
         ) : null}
+
         <CategoryGrid categories={categories} />
       </section>
 
       <section className="feature-band">
         <h2>
-          Useful details.
+          Learn the essentials.
           <br />
-          Human context.
+          Apply them with confidence.
         </h2>
         <Link className="button aqua" href="/about">
-          How the platform works <ArrowRight size={18} />
+          Discover our learning approach <ArrowRight size={18} />
         </Link>
       </section>
       <Footer />

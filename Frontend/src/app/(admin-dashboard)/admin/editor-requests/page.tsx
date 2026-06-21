@@ -6,7 +6,7 @@ export default function AdminEditorRequestsPage() {
     <DashboardPage
       eyebrow="Role management"
       title="Editor applications."
-      description="Review submitted applications and promote approved users to Editor. The backend automatically approves pending applications when the role changes."
+      description="Review contributor applications and give trusted community members access to editorial tools."
     >
       <AdminEditorRequests />
     </DashboardPage>

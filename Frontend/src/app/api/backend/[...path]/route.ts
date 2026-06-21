@@ -8,24 +8,37 @@ const BASE_URL = (
   process.env.FASTAPI_BASE_URL || "https://peripheralstalk-106b064b.fastapicloud.dev"
 ).replace(/\/$/, "");
 const PREFIX = (process.env.FASTAPI_API_PREFIX || "/api/v1").replace(/\/$/, "");
-const TIMEOUT = Number(process.env.FASTAPI_REQUEST_TIMEOUT_MS || 20000);
+const TIMEOUT = Number(process.env.FASTAPI_REQUEST_TIMEOUT_MS || 60000);
 
 async function forward(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
   const { path: segments } = await context.params;
-  const path = segments.join("/").replace(/^\/+|\/+$/g, "");
+  const normalizedPath = segments.join("/").replace(/^\/+|\/+$/g, "");
 
-  if (!isAllowedBackendRequest(request.method, path)) {
+  if (!isAllowedBackendRequest(request.method, normalizedPath)) {
     return NextResponse.json(
       {
-        detail:
-          "This endpoint or HTTP method is not part of the immutable backend contract.",
+        detail: "This action is not available.",
       },
       { status: 403 },
     );
   }
+
+  /*
+   * FastAPI distinguishes collection routes such as /category/ and /article/
+   * from their slashless forms. Next.js catch-all params omit a final slash,
+   * so preserve it from the original browser request. This avoids a 307
+   * redirect that can break replaying POST request bodies through a proxy.
+   */
+  const collectionRouteNeedsSlash =
+    normalizedPath === "category" || normalizedPath === "article";
+  const requestedTrailingSlash = request.nextUrl.pathname.endsWith("/");
+  const backendPath =
+    collectionRouteNeedsSlash || requestedTrailingSlash
+      ? `${normalizedPath}/`
+      : normalizedPath;
 
   const token = (await cookies()).get(AUTH_COOKIE)?.value;
   const headers = new Headers({ Accept: "application/json" });
@@ -34,7 +47,7 @@ async function forward(
   if (contentType) headers.set("content-type", contentType);
   if (token) headers.set("authorization", `Bearer ${token}`);
 
-  const url = new URL(`${BASE_URL}${PREFIX}/${path}`);
+  const url = new URL(`${BASE_URL}${PREFIX}/${backendPath}`);
   url.search = request.nextUrl.search;
 
   const controller = new AbortController();
@@ -51,6 +64,7 @@ async function forward(
       headers,
       body,
       cache: "no-store",
+      redirect: "follow",
       signal: controller.signal,
     });
 
@@ -65,12 +79,18 @@ async function forward(
       headers: responseHeaders,
     });
   } catch (error) {
+    console.error("Backend proxy request failed", {
+      method: request.method,
+      path: backendPath,
+      error,
+    });
+
     return NextResponse.json(
       {
         detail:
           error instanceof Error && error.name === "AbortError"
-            ? "The cloud backend request timed out."
-            : "Unable to connect to the deployed FastAPI backend.",
+            ? "The request timed out. Please try again."
+            : "The service is temporarily unavailable. Please try again.",
       },
       { status: 503 },
     );

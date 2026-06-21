@@ -344,7 +344,7 @@ function RegisterForm() {
       <h2>{step === 1 ? "Join us." : "Enter OTP."}</h2>
       <p className="muted">
         {step === 1
-          ? "Create a learning profile using the backend's secure email OTP flow."
+          ? "Create a learning profile and verify your email with a secure six-digit code."
           : `The verification code was sent to ${normalizedEmail}.`}
       </p>
 
@@ -446,7 +446,7 @@ function RegisterForm() {
               </strong>
               <span>
                 {countdown.secondsLeft > 0
-                  ? "The backend accepts this OTP for two minutes."
+                  ? "This verification code is valid for two minutes."
                   : "Request a fresh OTP before creating the account."}
               </span>
             </div>

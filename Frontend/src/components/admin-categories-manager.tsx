@@ -83,7 +83,7 @@ export function AdminCategoriesManager() {
   async function remove(category: CategoryRecord) {
     if (
       !window.confirm(
-        `Delete ${category.name}? The backend rejects deletion when any article version references this category.`,
+        `Delete ${category.name}? Categories connected to published learning content may need to be kept.`,
       )
     ) {
       return;
@@ -136,15 +136,14 @@ export function AdminCategoriesManager() {
           </button>
         </form>
         <p className="muted" style={{ marginBottom: 0 }}>
-          The backend category table stores only a name. Broad descriptions and JSON
-          specification schemas are not backend fields and are therefore not sent.
+          Use a short, clear category name that learners can recognize immediately.
         </p>
       </section>
 
       <section className="dashboard-section">
         <div className="toolbar">
           <div>
-            <p className="eyebrow muted">Current database records</p>
+            <p className="eyebrow muted">Current learning categories</p>
             <h2>{categories.length} categories</h2>
           </div>
           <button

@@ -10,8 +10,8 @@ export default function SuspendedPage() {
         </p>
         <h1 className="section-title">Access is currently unavailable.</h1>
         <p className="muted">
-          The cloud backend has marked this account inactive. An administrator must
-          unsuspend it before login is allowed again.
+          This account is currently inactive. Please contact an administrator to restore
+          access before signing in again.
         </p>
         <div className="actions">
           <Link href="/" className="button ghost">
