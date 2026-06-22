@@ -1,11 +1,8 @@
 # Verification
 
-- Prettier formatting: passed
-- TypeScript (`tsc --noEmit`): passed
-- Next.js 16.2.9 production compilation with webpack: passed
-- Static generation: 39 application routes generated
-- Package excludes `.next` and `node_modules`
+- Updated files were formatted with Prettier 3.8.4.
+- TypeScript/TSX syntax transpilation passed for the modified components.
+- No `window.prompt()` usage remains in the frontend source.
+- The delivery ZIP excludes `.next` and `node_modules`.
 
-## Backend-dependent verification
-
-The frontend request shapes match the uploaded immutable FastAPI source. Live production mutation testing was not performed from the build container. Comment mutation is known to fail in the supplied backend because JWT user IDs are strings while the comment SQL writes them to integer columns without conversion. See `FRONTEND_UPDATE_NOTES.md`.
+A complete dependency-aware `pnpm typecheck`, ESLint run, and Next.js build must be run after installing dependencies on the target machine.

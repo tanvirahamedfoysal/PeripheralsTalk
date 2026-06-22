@@ -3,8 +3,10 @@
 import Link from "next/link";
 import {
   CheckCircle2,
+  Copy,
   Eye,
   FilePlus2,
+  Hash,
   LoaderCircle,
   Pencil,
   RefreshCw,
@@ -15,7 +17,6 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { toast } from "sonner";
 
 import { RichTextEditor } from "@/components/rich-text-editor";
-import { parseArticleDocument, serializeArticleDocument } from "@/lib/article-document";
 import { apiRequest } from "@/lib/api/client";
 import { apiPaths } from "@/lib/api/paths";
 import type {
@@ -24,6 +25,17 @@ import type {
   ArticleVersionRecord,
   CategoryRecord,
 } from "@/lib/api/types";
+import { parseArticleDocument, serializeArticleDocument } from "@/lib/article-document";
+
+interface CreateArticleResponse {
+  is_successful?: boolean;
+  message?: string;
+  data?: {
+    article_id?: number;
+    version_number?: number;
+    peripheral_id?: number;
+  };
+}
 
 export function ArticleWorkspace({
   admin = false,
@@ -34,16 +46,24 @@ export function ArticleWorkspace({
 }) {
   const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [peripheralId, setPeripheralId] = useState("1");
+  const [versionPeripheralId, setVersionPeripheralId] = useState("1");
   const [title, setTitle] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
   const [articleId, setArticleId] = useState("");
+  const [createdArticleId, setCreatedArticleId] = useState<number | null>(null);
   const [versions, setVersions] = useState<ArticleVersionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [versionsLoading, setVersionsLoading] = useState(false);
   const [working, setWorking] = useState<string | null>(null);
 
-  const selectedCategory = useMemo(
-    () => categories.find((category) => String(category.id) === peripheralId),
-    [categories, peripheralId],
+  const selectedVersionCategory = useMemo(
+    () => categories.find((category) => String(category.id) === versionPeripheralId),
+    [categories, versionPeripheralId],
+  );
+
+  const activeVersion = useMemo(
+    () => versions.find((version) => version.is_active),
+    [versions],
   );
 
   const canSubmit = title.trim().length > 0 && hasMeaningfulBody(bodyHtml);
@@ -55,11 +75,14 @@ export function ArticleWorkspace({
       );
       const records = [...(response.data ?? [])].sort((a, b) => a.id - b.id);
       setCategories(records);
+
       if (records.length > 0) {
+        const firstId = String(records[0].id);
         setPeripheralId((current) =>
-          records.some((item) => String(item.id) === current)
-            ? current
-            : String(records[0].id),
+          records.some((item) => String(item.id) === current) ? current : firstId,
+        );
+        setVersionPeripheralId((current) =>
+          records.some((item) => String(item.id) === current) ? current : firstId,
         );
       }
     } catch (error) {
@@ -71,26 +94,37 @@ export function ArticleWorkspace({
     }
   }, []);
 
-  const loadVersions = useCallback(async () => {
-    if (!admin || !peripheralId) return;
-    try {
-      const response = await apiRequest<ApiEnvelope<ArticleVersionRecord[]>>(
-        apiPaths.article.versions(peripheralId),
-      );
-      setVersions(response.data ?? []);
-    } catch (error) {
-      setVersions([]);
-      toast.error(error instanceof Error ? error.message : "Unable to load versions.");
-    }
-  }, [admin, peripheralId]);
+  const loadVersions = useCallback(
+    async (categoryId: string) => {
+      if (!admin || !categoryId) return;
+
+      setVersionsLoading(true);
+      try {
+        const response = await apiRequest<ApiEnvelope<ArticleVersionRecord[]>>(
+          apiPaths.article.versions(categoryId),
+        );
+        setVersions(response.data ?? []);
+      } catch (error) {
+        setVersions([]);
+        toast.error(
+          error instanceof Error ? error.message : "Unable to load versions.",
+        );
+      } finally {
+        setVersionsLoading(false);
+      }
+    },
+    [admin],
+  );
 
   useEffect(() => {
     void loadCategories();
   }, [loadCategories]);
 
   useEffect(() => {
-    void loadVersions();
-  }, [loadVersions]);
+    if (admin && versionPeripheralId) {
+      void loadVersions(versionPeripheralId);
+    }
+  }, [admin, loadVersions, versionPeripheralId]);
 
   function documentContent(): string {
     return serializeArticleDocument(title, bodyHtml);
@@ -102,24 +136,32 @@ export function ArticleWorkspace({
 
     setWorking("create");
     try {
-      const response = await apiRequest<{
-        message?: string;
-        data?: { article_id?: number };
-      }>(apiPaths.article.create, {
-        method: "POST",
-        body: {
-          peripheral_id: Number(peripheralId),
-          content: documentContent(),
+      const response = await apiRequest<CreateArticleResponse>(
+        apiPaths.article.create,
+        {
+          method: "POST",
+          body: {
+            peripheral_id: Number(peripheralId),
+            content: documentContent(),
+          },
         },
-      });
+      );
 
+      const generatedId = response.data?.article_id;
       toast.success(response.message ?? "New article version created.");
-      if (response.data?.article_id) {
-        setArticleId(String(response.data.article_id));
+
+      if (generatedId) {
+        setArticleId(String(generatedId));
+        setCreatedArticleId(generatedId);
       }
+
+      setVersionPeripheralId(peripheralId);
       setTitle("");
       setBodyHtml("");
-      await loadVersions();
+
+      if (admin) {
+        await loadVersions(peripheralId);
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to create article version.",
@@ -136,6 +178,7 @@ export function ArticleWorkspace({
 
   async function loadArticleById(id: number) {
     setArticleId(String(id));
+    setCreatedArticleId(null);
     setWorking("load");
     try {
       const response = await apiRequest<ApiEnvelope<ArticleRecord>>(
@@ -145,6 +188,7 @@ export function ArticleWorkspace({
       setTitle(parsed.title || `Article #${id}`);
       setBodyHtml(parsed.bodyHtml);
       setPeripheralId(String(response.data.peripheral_id));
+      setVersionPeripheralId(String(response.data.peripheral_id));
       toast.success(`Loaded article #${id}.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load article.");
@@ -165,7 +209,9 @@ export function ArticleWorkspace({
         },
       );
       toast.success(response.message ?? "Article updated.");
-      await loadVersions();
+      if (admin) {
+        await loadVersions(versionPeripheralId);
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to update article.");
     } finally {
@@ -177,11 +223,11 @@ export function ArticleWorkspace({
     setWorking(`activate-${version.id}`);
     try {
       const response = await apiRequest<{ message?: string }>(
-        apiPaths.article.activate(peripheralId, version.id),
+        apiPaths.article.activate(versionPeripheralId, version.id),
         { method: "POST" },
       );
       toast.success(response.message ?? "Article activated.");
-      await loadVersions();
+      await loadVersions(versionPeripheralId);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to activate article.",
@@ -207,11 +253,20 @@ export function ArticleWorkspace({
         { method: "DELETE" },
       );
       toast.success(response.message ?? "Article deleted.");
-      await loadVersions();
+      await loadVersions(versionPeripheralId);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to delete article.");
     } finally {
       setWorking(null);
+    }
+  }
+
+  async function copyArticleId(id: number) {
+    try {
+      await navigator.clipboard.writeText(String(id));
+      toast.success(`Article ID #${id} copied.`);
+    } catch {
+      toast.error("Unable to copy the article ID.");
     }
   }
 
@@ -291,7 +346,35 @@ export function ArticleWorkspace({
                   </button>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="field">
+                <label className="label" htmlFor="generated-article-id">
+                  Searchable article ID
+                </label>
+                <div className="input-action-row">
+                  <input
+                    id="generated-article-id"
+                    className="input"
+                    value={createdArticleId ? String(createdArticleId) : ""}
+                    placeholder="Assigned after the article is saved"
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    className="icon-button"
+                    title="Copy article ID"
+                    disabled={!createdArticleId}
+                    onClick={() =>
+                      createdArticleId
+                        ? void copyArticleId(createdArticleId)
+                        : undefined
+                    }
+                  >
+                    <Copy size={17} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <RichTextEditor
@@ -342,23 +425,80 @@ export function ArticleWorkspace({
               </Link>
             ) : null}
           </div>
+
+          {createdArticleId ? (
+            <div className="created-article-panel" role="status" aria-live="polite">
+              <div className="created-article-icon">
+                <Hash size={20} />
+              </div>
+              <div>
+                <strong>Article created with ID #{createdArticleId}</strong>
+                <p>
+                  Use this number in the Articles page search or when loading the
+                  article for editing.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="button ghost compact-button"
+                onClick={() => void copyArticleId(createdArticleId)}
+              >
+                <Copy size={16} /> Copy ID
+              </button>
+            </div>
+          ) : null}
         </form>
       </section>
 
       {admin && !createOnly ? (
         <section className="dashboard-section">
-          <div className="toolbar">
+          <div className="toolbar version-control-toolbar">
             <div>
               <p className="eyebrow muted">Admin version control</p>
-              <h2>{selectedCategory?.name ?? "Peripheral"} versions</h2>
+              <h2>{selectedVersionCategory?.name ?? "Peripheral"} versions</h2>
+              <p className="muted version-control-summary">
+                {activeVersion
+                  ? `Article #${activeVersion.id} is currently active.`
+                  : "No version is active for this category."}
+              </p>
             </div>
             <button
               className="button ghost"
-              onClick={() => void loadVersions()}
-              disabled={working !== null}
+              onClick={() => void loadVersions(versionPeripheralId)}
+              disabled={working !== null || versionsLoading}
             >
-              <RefreshCw size={17} /> Refresh
+              {versionsLoading ? (
+                <LoaderCircle className="spin" size={17} />
+              ) : (
+                <RefreshCw size={17} />
+              )}
+              Refresh
             </button>
+          </div>
+
+          <div className="version-category-picker">
+            <div className="field">
+              <label className="label" htmlFor="version-category-select">
+                Choose a category to manage
+              </label>
+              <select
+                id="version-category-select"
+                className="select"
+                value={versionPeripheralId}
+                onChange={(event) => setVersionPeripheralId(event.target.value)}
+                disabled={versionsLoading || working !== null}
+              >
+                {categories.map((category, index) => (
+                  <option key={category.id} value={category.id}>
+                    {index + 1}. {category.name}
+                  </option>
+                ))}
+              </select>
+              <small className="muted">
+                Select any category to inspect its versions and choose the one shown on
+                the public category page.
+              </small>
+            </div>
           </div>
 
           <div className="responsive-table-wrap">
@@ -424,11 +564,20 @@ export function ArticleWorkspace({
                     </td>
                   </tr>
                 ))}
-                {versions.length === 0 ? (
+                {versions.length === 0 && !versionsLoading ? (
                   <tr>
                     <td colSpan={6}>
                       <div className="empty-state">
-                        No article versions are available for this peripheral.
+                        No article versions are available for this category.
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+                {versionsLoading ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="empty-state">
+                        <LoaderCircle className="spin" size={18} /> Loading versions…
                       </div>
                     </td>
                   </tr>

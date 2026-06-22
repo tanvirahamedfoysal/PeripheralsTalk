@@ -11,8 +11,16 @@ import {
   Pilcrow,
   Table2,
   Underline,
+  X,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
 import { toast } from "sonner";
 
 import { apiRequest } from "@/lib/api/client";
@@ -36,7 +44,11 @@ export function RichTextEditor({
 }: RichTextEditorProps): React.ReactElement {
   const editorRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const savedSelectionRef = useRef<Range | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [tableDialogOpen, setTableDialogOpen] = useState(false);
+  const [tableRows, setTableRows] = useState("3");
+  const [tableColumns, setTableColumns] = useState("3");
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -49,40 +61,96 @@ export function RichTextEditor({
     onBodyChange(editorRef.current?.innerHTML ?? "");
   }
 
+  function saveSelection(): void {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    if (editor.contains(range.commonAncestorContainer)) {
+      savedSelectionRef.current = range.cloneRange();
+    }
+  }
+
+  function restoreSelection(): void {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection) return;
+
+    editor.focus();
+    selection.removeAllRanges();
+
+    if (savedSelectionRef.current) {
+      selection.addRange(savedSelectionRef.current);
+      return;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    selection.addRange(range);
+  }
+
   function execute(command: string, value?: string): void {
     if (disabled) return;
-    editorRef.current?.focus();
+    restoreSelection();
     document.execCommand(command, false, value);
+    saveSelection();
     syncContent();
   }
 
   function preventToolbarBlur(event: MouseEvent<HTMLButtonElement>): void {
+    saveSelection();
     event.preventDefault();
   }
 
-  function insertTable(): void {
+  function openTableDialog(): void {
+    if (disabled) return;
+    saveSelection();
+    setTableRows("3");
+    setTableColumns("3");
+    setTableDialogOpen(true);
+  }
+
+  function closeTableDialog(): void {
+    setTableDialogOpen(false);
+    requestAnimationFrame(() => restoreSelection());
+  }
+
+  function insertTable(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
     if (disabled) return;
 
-    const rowInput = window.prompt("Number of rows", "3");
-    if (rowInput === null) return;
-    const columnInput = window.prompt("Number of columns", "3");
-    if (columnInput === null) return;
+    const rows = Number.parseInt(tableRows, 10);
+    const columns = Number.parseInt(tableColumns, 10);
 
-    const rows = Math.min(12, Math.max(1, Number.parseInt(rowInput, 10) || 3));
-    const columns = Math.min(8, Math.max(1, Number.parseInt(columnInput, 10) || 3));
+    if (!Number.isInteger(rows) || rows < 1 || rows > 20) {
+      toast.error("Choose between 1 and 20 rows.");
+      return;
+    }
 
-    const header = Array.from({ length: columns }, (_, index) => {
-      return `<th scope="col">Column ${index + 1}</th>`;
+    if (!Number.isInteger(columns) || columns < 1 || columns > 10) {
+      toast.error("Choose between 1 and 10 columns.");
+      return;
+    }
+
+    const headingCells = Array.from({ length: columns }, (_, index) => {
+      return `<th scope="col">Heading ${index + 1}</th>`;
     }).join("");
-    const body = Array.from({ length: rows }, () => {
+
+    const bodyRows = Array.from({ length: Math.max(0, rows - 1) }, () => {
       const cells = Array.from({ length: columns }, () => "<td>Text</td>").join("");
       return `<tr>${cells}</tr>`;
     }).join("");
 
-    execute(
-      "insertHTML",
-      `<div class="article-table-wrap"><table><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table></div><p><br></p>`,
-    );
+    setTableDialogOpen(false);
+    requestAnimationFrame(() => {
+      execute(
+        "insertHTML",
+        `<div class="article-table-wrap"><table><thead><tr>${headingCells}</tr></thead><tbody>${bodyRows}</tbody></table></div><p><br></p>`,
+      );
+      toast.success(`${rows} × ${columns} table inserted.`);
+    });
   }
 
   async function uploadAndInsertImage(event: ChangeEvent<HTMLInputElement>) {
@@ -104,11 +172,10 @@ export function RichTextEditor({
         { method: "POST", body: form },
       );
 
-      const alternativeText = window.prompt(
-        "Describe this image for learners",
-        file.name.replace(/\.[^.]+$/, ""),
-      );
-      const safeAlt = (alternativeText ?? "Article illustration")
+      const descriptiveName = file.name
+        .replace(/\.[^.]+$/, "")
+        .replaceAll(/[-_]+/g, " ");
+      const safeAlt = (descriptiveName || "Article illustration")
         .replaceAll("&", "&amp;")
         .replaceAll('"', "&quot;")
         .replaceAll("<", "&lt;")
@@ -124,6 +191,10 @@ export function RichTextEditor({
     } finally {
       setUploading(false);
     }
+  }
+
+  function handleEditorKeyUp(): void {
+    saveSelection();
   }
 
   return (
@@ -210,7 +281,7 @@ export function RichTextEditor({
           <ToolbarButton
             label="Insert table"
             onMouseDown={preventToolbarBlur}
-            onClick={insertTable}
+            onClick={openTableDialog}
             disabled={disabled}
           >
             <Table2 size={17} />
@@ -245,14 +316,101 @@ export function RichTextEditor({
           role="textbox"
           aria-multiline="true"
           data-placeholder="Write the article here. Select text and use the toolbar to format it."
-          onInput={syncContent}
+          onInput={() => {
+            saveSelection();
+            syncContent();
+          }}
+          onMouseUp={saveSelection}
+          onKeyUp={handleEditorKeyUp}
+          onFocus={saveSelection}
           onBlur={syncContent}
         />
         <small className="muted">
-          The title, headings, bold and italic text, underline, tables and images are
-          stored together as one HTML document in the article content field.
+          The title, headings, formatting, tables and images are saved together and
+          restored when the article is opened.
         </small>
       </div>
+
+      {tableDialogOpen ? (
+        <div
+          className="editor-dialog-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target) closeTableDialog();
+          }}
+        >
+          <form
+            className="editor-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="insert-table-title"
+            onSubmit={insertTable}
+          >
+            <div className="editor-dialog-heading">
+              <div>
+                <p className="eyebrow muted">Table settings</p>
+                <h3 id="insert-table-title">Insert a table</h3>
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                title="Close"
+                onClick={closeTableDialog}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="editor-dialog-grid">
+              <div className="field">
+                <label className="label" htmlFor="table-row-count">
+                  Rows
+                </label>
+                <input
+                  id="table-row-count"
+                  className="input"
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={tableRows}
+                  onChange={(event) => setTableRows(event.target.value)}
+                  autoFocus
+                  required
+                />
+              </div>
+              <div className="field">
+                <label className="label" htmlFor="table-column-count">
+                  Columns
+                </label>
+                <input
+                  id="table-column-count"
+                  className="input"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={tableColumns}
+                  onChange={(event) => setTableColumns(event.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <p className="muted editor-dialog-note">
+              The first row is inserted as the table heading. You can edit every cell
+              directly after insertion.
+            </p>
+
+            <div className="actions editor-dialog-actions">
+              <button type="button" className="button ghost" onClick={closeTableDialog}>
+                Cancel
+              </button>
+              <button type="submit" className="button">
+                <Table2 size={17} /> Insert table
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }

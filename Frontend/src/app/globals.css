@@ -3490,3 +3490,143 @@ strong,
     padding: 18px;
   }
 }
+
+/* Article workspace refinements */
+.version-control-toolbar {
+  align-items: flex-start;
+}
+
+.version-control-summary {
+  margin: 8px 0 0;
+}
+
+.version-category-picker {
+  margin: 22px 0 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft);
+}
+
+.version-category-picker .field {
+  max-width: 620px;
+}
+
+.created-article-panel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--teal) 32%, var(--line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--teal) 8%, var(--white));
+}
+
+.created-article-panel strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  letter-spacing: 0.012em;
+}
+
+.created-article-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.created-article-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--teal);
+  color: var(--white);
+}
+
+.compact-button {
+  min-height: 40px;
+  padding: 9px 13px;
+}
+
+.editor-dialog-backdrop {
+  position: fixed;
+  z-index: 250;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(7 51 44 / 52%);
+  backdrop-filter: blur(5px);
+}
+
+.editor-dialog {
+  width: min(100%, 520px);
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--white);
+  box-shadow: 0 28px 80px rgb(7 51 44 / 28%);
+  animation: editor-dialog-in 180ms ease both;
+}
+
+.editor-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.editor-dialog-heading h3 {
+  margin: 5px 0 0;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.editor-dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.editor-dialog-note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.editor-dialog-actions {
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+@keyframes editor-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 720px) {
+  .created-article-panel {
+    grid-template-columns: auto 1fr;
+  }
+
+  .created-article-panel .compact-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .editor-dialog-grid {
+    grid-template-columns: 1fr;
+  }
+}
