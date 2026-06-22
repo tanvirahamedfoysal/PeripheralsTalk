@@ -3142,3 +3142,351 @@ textarea,
 select {
   font-family: var(--font-body);
 }
+
+/* Refinements: readable typography, smoother navigation and editorial tools */
+body,
+p,
+li,
+label,
+input,
+textarea,
+select,
+button,
+a {
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.display,
+.section-title,
+.dash-title {
+  letter-spacing: -0.018em;
+}
+
+.display {
+  letter-spacing: -0.028em;
+}
+
+.section-title,
+.dash-title {
+  letter-spacing: -0.02em;
+}
+
+b,
+strong,
+.button,
+.topnav a,
+.dash-nav a,
+.side-link {
+  letter-spacing: 0.004em;
+}
+
+.public-shell {
+  transition: padding-left 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.peripheral-sidebar {
+  will-change: width;
+  transition:
+    width 680ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 520ms ease;
+}
+
+.side-label {
+  transition:
+    max-width 590ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 360ms ease,
+    transform 590ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.side-link {
+  transition:
+    background 260ms ease,
+    color 260ms ease,
+    transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    padding 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.side-category-number {
+  display: inline-block;
+  width: 28px;
+  margin-right: 8px;
+  color: rgb(255 255 255 / 48%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dash-logout,
+.button.ghost.dash-logout {
+  border-color: rgb(255 255 255 / 48%);
+  background: rgb(255 255 255 / 10%);
+  color: var(--white);
+}
+
+.dash-logout:hover,
+.button.ghost.dash-logout:hover {
+  border-color: var(--sand);
+  background: rgb(255 255 255 / 18%);
+  color: var(--white);
+}
+
+.rich-editor-shell {
+  display: grid;
+  gap: 20px;
+}
+
+.article-title-input {
+  min-height: 58px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background: var(--soft);
+}
+
+.editor-tool-button {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.editor-tool-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line);
+  background: var(--white);
+}
+
+.editor-tool-button:disabled {
+  opacity: 0.45;
+}
+
+.editor-toolbar-divider {
+  width: 1px;
+  height: 26px;
+  margin-inline: 3px;
+  background: var(--line);
+}
+
+.rich-editor {
+  min-height: 420px;
+  padding: 24px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 0 0 16px 16px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.75;
+  outline: none;
+}
+
+.rich-editor:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgb(72 91 70 / 12%);
+}
+
+.rich-editor:empty::before {
+  color: var(--muted);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.rich-editor h1,
+.rich-editor h2,
+.rich-editor h3 {
+  margin: 1.2em 0 0.55em;
+  letter-spacing: -0.018em;
+}
+
+.rich-editor p,
+.rich-editor ul,
+.rich-editor ol,
+.rich-editor figure,
+.rich-editor table {
+  margin: 0 0 1em;
+}
+
+.rich-editor img,
+.rich-article figure img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+
+.rich-editor figure,
+.rich-article figure {
+  margin: 1.4em 0;
+}
+
+.rich-editor figcaption,
+.rich-article figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.article-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.rich-editor table,
+.article-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rich-editor th,
+.rich-editor td,
+.article-table-wrap th,
+.article-table-wrap td {
+  min-width: 110px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.rich-editor th,
+.article-table-wrap th {
+  background: var(--soft);
+  font-weight: 750;
+}
+
+.pt-article-document > [data-pt-title="1"] {
+  margin-top: 0;
+}
+
+.article-directory-page {
+  display: grid;
+  gap: 34px;
+  padding-block: 48px 72px;
+}
+
+.article-directory-page .article-finder {
+  margin-inline: auto;
+}
+
+.recent-articles-section {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.recent-articles-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.recent-articles-heading h2 {
+  margin: 7px 0 6px;
+  font-size: clamp(28px, 3vw, 42px);
+}
+
+.recent-articles-heading p:last-child {
+  margin: 0;
+}
+
+.recent-article-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.recent-article-card {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.recent-article-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--sage);
+  background: var(--white);
+}
+
+.recent-article-card h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.recent-article-card p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.recent-article-index {
+  color: var(--sage);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.recent-article-empty {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  background: var(--soft);
+}
+
+.recent-article-empty p {
+  margin: 5px 0 0;
+}
+
+@media (max-width: 780px) {
+  .recent-article-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rich-editor {
+    min-height: 340px;
+    padding: 18px;
+  }
+}

@@ -26,6 +26,7 @@ import type {
   CommentNode,
   CommentRecord,
 } from "@/lib/api/types";
+import { rememberArticle } from "@/lib/recent-articles";
 import { sanitizeArticleHtml } from "@/lib/sanitize-html";
 import { useSession } from "@/providers/session-provider";
 
@@ -70,6 +71,7 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
         ),
       ]);
       setArticle(articlePayload.data);
+      rememberArticle(articlePayload.data);
       setComments(commentPayload.data ?? []);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to load article.");
@@ -120,8 +122,7 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
   if (loading) {
     return (
       <div className="loading-panel">
-        <LoaderCircle className="spin" size={28} /> Loading article from the cloud
-        article…
+        <LoaderCircle className="spin" size={28} /> Loading article…
       </div>
     );
   }

@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 
 import { Footer } from "@/components/footer";
 import { PublicShell } from "@/components/public-shell";
+import { RecentArticles } from "@/components/recent-articles";
 import { SiteHeader } from "@/components/site-header";
 
 export default function ArticlesIndexPage() {
@@ -20,7 +21,7 @@ export default function ArticlesIndexPage() {
   return (
     <PublicShell>
       <SiteHeader />
-      <main className="article-shell article-finder-page">
+      <main className="article-shell article-directory-page">
         <section className="dashboard-section article-finder">
           <div className="article-finder-icon">
             <FileSearch size={46} />
@@ -51,6 +52,8 @@ export default function ArticlesIndexPage() {
             Browse categories instead
           </Link>
         </section>
+
+        <RecentArticles />
       </main>
       <Footer />
     </PublicShell>

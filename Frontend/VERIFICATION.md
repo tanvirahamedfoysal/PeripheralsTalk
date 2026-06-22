@@ -1,29 +1,11 @@
-# Frontend verification
+# Verification
 
-The delivered source tree was checked after all changes.
+- Prettier formatting: passed
+- TypeScript (`tsc --noEmit`): passed
+- Next.js 16.2.9 production compilation with webpack: passed
+- Static generation: 39 application routes generated
+- Package excludes `.next` and `node_modules`
 
-```text
-Prettier: PASS
-TypeScript strict typecheck: PASS
-ESLint: PASS
-Next.js 16.2.9 production build: PASS
-```
+## Backend-dependent verification
 
-The optimized build generated all 39 application routes successfully.
-
-## Excluded from the ZIP
-
-```text
-.next
-node_modules
-package-lock.json
-tsconfig.tsbuildinfo
-```
-
-## Manual requirement
-
-Copy your chosen image to:
-
-```text
-public/study.jpg
-```
+The frontend request shapes match the uploaded immutable FastAPI source. Live production mutation testing was not performed from the build container. Comment mutation is known to fail in the supplied backend because JWT user IDs are strings while the comment SQL writes them to integer columns without conversion. See `FRONTEND_UPDATE_NOTES.md`.

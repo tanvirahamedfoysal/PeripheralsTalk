@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { apiRequest } from "@/lib/api/client";
 import { apiPaths } from "@/lib/api/paths";
 import type { ApiEnvelope, CategoryRecord } from "@/lib/api/types";
+import { notifyCategoryUpdate } from "@/lib/category-events";
 
 export function AdminCategoriesManager() {
   const [categories, setCategories] = useState<CategoryRecord[]>([]);
@@ -22,7 +23,7 @@ export function AdminCategoriesManager() {
       const response = await apiRequest<ApiEnvelope<CategoryRecord[]>>(
         apiPaths.category.list,
       );
-      setCategories(response.data ?? []);
+      setCategories([...(response.data ?? [])].sort((a, b) => a.id - b.id));
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to load categories.",
@@ -51,6 +52,7 @@ export function AdminCategoriesManager() {
       toast.success(response.message ?? "Category created.");
       setNewName("");
       await load();
+      notifyCategoryUpdate();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to create category.",
@@ -71,6 +73,7 @@ export function AdminCategoriesManager() {
       toast.success(response.message ?? "Category updated.");
       setEditingId(null);
       await load();
+      notifyCategoryUpdate();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to update category.",
@@ -97,6 +100,7 @@ export function AdminCategoriesManager() {
       );
       toast.success(response.message ?? "Category deleted.");
       await load();
+      notifyCategoryUpdate();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Unable to delete category.",
@@ -156,10 +160,10 @@ export function AdminCategoriesManager() {
         </div>
 
         <div className="category-admin-list">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <div className="category-admin-row" key={category.id}>
               <span className="category-admin-id">
-                {String(category.id).padStart(2, "0")}
+                {String(index + 1).padStart(2, "0")}
               </span>
               {editingId === category.id ? (
                 <input

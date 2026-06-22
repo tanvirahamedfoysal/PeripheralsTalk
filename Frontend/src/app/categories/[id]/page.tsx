@@ -6,7 +6,11 @@ import { Footer } from "@/components/footer";
 import { PublicShell } from "@/components/public-shell";
 import { SiteHeader } from "@/components/site-header";
 import { backendErrorMessage, fastApi } from "@/lib/api/server";
-import type { ApiEnvelope, CategoryDetailRecord } from "@/lib/api/types";
+import type {
+  ApiEnvelope,
+  CategoryDetailRecord,
+  CategoryRecord,
+} from "@/lib/api/types";
 import { getCategory } from "@/lib/constants/categories";
 import { sanitizeArticleHtml } from "@/lib/sanitize-html";
 
@@ -18,16 +22,37 @@ export default async function CategoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const documented = getCategory(id);
-  if (!documented) notFound();
+  if (!/^\d+$/.test(id)) notFound();
 
-  const result = await fastApi<ApiEnvelope<CategoryDetailRecord>>(`category/${id}`, {
-    method: "GET",
-  });
-  const live = result.ok ? result.data.data : null;
-  const Icon = documented.icon;
-  const name = live?.name ?? documented.name;
-  const articleAvailable = Boolean(result.ok && live?.article?.trim());
+  const [listResult, detailResult] = await Promise.all([
+    fastApi<ApiEnvelope<CategoryRecord[]>>("category/", { method: "GET" }),
+    fastApi<ApiEnvelope<CategoryDetailRecord>>(`category/${id}`, {
+      method: "GET",
+    }),
+  ]);
+
+  const categories = listResult.ok
+    ? [...(listResult.data.data ?? [])].sort((a, b) => a.id - b.id)
+    : [];
+  const liveRecord = categories.find((category) => category.id === Number(id));
+  const documented = getCategory(id);
+
+  if (listResult.ok && !liveRecord) notFound();
+  if (!documented && !liveRecord) notFound();
+
+  const live = detailResult.ok ? detailResult.data.data : null;
+  const Icon = documented?.icon ?? Layers3;
+  const name = live?.name ?? liveRecord?.name ?? documented?.name ?? "Peripheral";
+  const summary =
+    documented?.summary ??
+    "Explore the essential ideas, practical uses and shared learning resources for this peripheral.";
+  const articleAvailable = Boolean(detailResult.ok && live?.article?.trim());
+  const position = Math.max(
+    1,
+    categories.findIndex((category) => category.id === Number(id)) + 1 ||
+      documented?.id ||
+      1,
+  );
 
   return (
     <PublicShell>
@@ -38,22 +63,26 @@ export default async function CategoryPage({
             <ArrowLeft size={15} /> All categories
           </Link>
           <p className="eyebrow category-kicker">
-            Category {String(documented.id).padStart(2, "0")}
+            Category {String(position).padStart(2, "0")}
           </p>
           <h1 className="display">{name}.</h1>
-          <p className="category-intro">{documented.summary}</p>
+          <p className="category-intro">{summary}</p>
         </div>
         <aside className="category-identity-card">
           <div className="category-icon category-detail-icon">
             <Icon size={43} strokeWidth={1.45} />
           </div>
           <div>
-            <p className="eyebrow muted">Specification family</p>
-            <h2>{documented.specs.length} structured fields</h2>
+            <p className="eyebrow muted">Learning topic</p>
+            <h2>
+              {documented
+                ? `${documented.specs.length} structured fields`
+                : "Community learning category"}
+            </h2>
           </div>
           <div className="category-stat-row">
             <span>
-              <Layers3 size={17} /> Documented category
+              <Layers3 size={17} /> Organized topic
             </span>
             <span>
               <BookOpenCheck size={17} /> Guided learning content
@@ -63,26 +92,41 @@ export default async function CategoryPage({
       </header>
 
       <main className="article-shell category-content">
-        <section className="dashboard-section category-spec-section">
-          <div className="toolbar">
-            <div>
-              <p className="eyebrow" style={{ color: "var(--teal)" }}>
-                Technical vocabulary
-              </p>
-              <h2>Structured specifications</h2>
-            </div>
-            <span className="status aqua">{documented.specs.length} fields</span>
-          </div>
-          <div className="spec-grid">
-            {documented.specs.map((spec, index) => (
-              <div className="spec-row" key={spec}>
-                <span className="spec-index">{String(index + 1).padStart(2, "0")}</span>
-                <b>{spec}</b>
-                <span className="muted">Category field</span>
+        {documented ? (
+          <section className="dashboard-section category-spec-section">
+            <div className="toolbar">
+              <div>
+                <p className="eyebrow" style={{ color: "var(--teal)" }}>
+                  Technical vocabulary
+                </p>
+                <h2>Structured specifications</h2>
               </div>
-            ))}
-          </div>
-        </section>
+              <span className="status aqua">{documented.specs.length} fields</span>
+            </div>
+            <div className="spec-grid">
+              {documented.specs.map((spec, index) => (
+                <div className="spec-row" key={spec}>
+                  <span className="spec-index">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <b>{spec}</b>
+                  <span className="muted">Category field</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="dashboard-section category-spec-section">
+            <p className="eyebrow" style={{ color: "var(--teal)" }}>
+              Learning pathway
+            </p>
+            <h2>Start with the active article</h2>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              This newly added category will grow as Editors publish and refine its
+              learning material.
+            </p>
+          </section>
+        )}
 
         <section className="dashboard-section">
           <div className="toolbar">
@@ -105,7 +149,7 @@ export default async function CategoryPage({
               <b>Unavailable</b>
               <p>
                 {backendErrorMessage(
-                  result.data,
+                  detailResult.data,
                   `${name} does not currently have an active article.`,
                 )}
               </p>

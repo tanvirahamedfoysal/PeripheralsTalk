@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Layers3 } from "lucide-react";
 
 import type { CategoryRecord } from "@/lib/api/types";
 import { peripheralCategories } from "@/lib/constants/categories";
@@ -11,29 +11,35 @@ export function CategoryGrid({
   categories?: CategoryRecord[];
   limit?: number;
 }) {
-  const backendNames = new Map(categories?.map((item) => [item.id, item.name]));
+  const records = categories?.length
+    ? [...categories].sort((a, b) => a.id - b.id)
+    : peripheralCategories.map(({ id, name }) => ({ id, name }));
+  const visible = typeof limit === "number" ? records.slice(0, limit) : records;
 
   return (
     <div className="grid-4">
-      {peripheralCategories.slice(0, limit).map((category) => {
-        const Icon = category.icon;
-        const name = backendNames.get(category.id) ?? category.name;
+      {visible.map((record, index) => {
+        const documented = peripheralCategories.find((item) => item.id === record.id);
+        const Icon = documented?.icon ?? Layers3;
+        const summary =
+          documented?.summary ??
+          "Explore core ideas, practical examples and community learning resources.";
 
         return (
           <Link
-            href={`/categories/${category.id}`}
+            href={`/categories/${record.id}`}
             className="card category-card"
-            key={category.id}
+            key={record.id}
           >
             <span className="category-number">
-              {String(category.id).padStart(2, "0")}
+              {String(index + 1).padStart(2, "0")}
             </span>
             <div className="category-icon">
               <Icon size={27} />
             </div>
             <div>
-              <h3>{name}</h3>
-              <p>{category.summary}</p>
+              <h3>{record.name}</h3>
+              <p>{summary}</p>
               <span className="category-explore">
                 Explore <ArrowUpRight size={14} />
               </span>

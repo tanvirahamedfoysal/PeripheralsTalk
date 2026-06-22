@@ -37,3 +37,15 @@ collection routes before forwarding the request. It also explicitly includes
 same-origin credentials and allows up to 60 seconds for normal cloud requests.
 
 No backend code was changed.
+
+## Latest refinement
+
+- Sequential category display numbering despite database ID gaps.
+- Live custom categories in the public sidebar and category directory.
+- Custom category detail support.
+- Readable Dashboard Logout action.
+- Six recently opened article cards after the article-ID finder.
+- Rich HTML article authoring with title, bold, italic, underline, lists, tables and uploaded images.
+- Improved request-body forwarding for article/category writes.
+- Relaxed letter spacing and smoother sidebar transitions.
+- Documented the immutable backend defect that prevents comment mutation requests from completing.

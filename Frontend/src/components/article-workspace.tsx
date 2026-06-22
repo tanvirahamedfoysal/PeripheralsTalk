@@ -14,6 +14,8 @@ import {
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { RichTextEditor } from "@/components/rich-text-editor";
+import { parseArticleDocument, serializeArticleDocument } from "@/lib/article-document";
 import { apiRequest } from "@/lib/api/client";
 import { apiPaths } from "@/lib/api/paths";
 import type {
@@ -32,7 +34,8 @@ export function ArticleWorkspace({
 }) {
   const [categories, setCategories] = useState<CategoryRecord[]>([]);
   const [peripheralId, setPeripheralId] = useState("1");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+  const [bodyHtml, setBodyHtml] = useState("");
   const [articleId, setArticleId] = useState("");
   const [versions, setVersions] = useState<ArticleVersionRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,12 +46,14 @@ export function ArticleWorkspace({
     [categories, peripheralId],
   );
 
+  const canSubmit = title.trim().length > 0 && hasMeaningfulBody(bodyHtml);
+
   const loadCategories = useCallback(async () => {
     try {
       const response = await apiRequest<ApiEnvelope<CategoryRecord[]>>(
         apiPaths.category.list,
       );
-      const records = response.data ?? [];
+      const records = [...(response.data ?? [])].sort((a, b) => a.id - b.id);
       setCategories(records);
       if (records.length > 0) {
         setPeripheralId((current) =>
@@ -82,13 +87,19 @@ export function ArticleWorkspace({
   useEffect(() => {
     void loadCategories();
   }, [loadCategories]);
+
   useEffect(() => {
     void loadVersions();
   }, [loadVersions]);
 
+  function documentContent(): string {
+    return serializeArticleDocument(title, bodyHtml);
+  }
+
   async function createVersion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!content.trim()) return;
+    if (!canSubmit) return;
+
     setWorking("create");
     try {
       const response = await apiRequest<{
@@ -96,11 +107,18 @@ export function ArticleWorkspace({
         data?: { article_id?: number };
       }>(apiPaths.article.create, {
         method: "POST",
-        body: { peripheral_id: Number(peripheralId), content: content.trim() },
+        body: {
+          peripheral_id: Number(peripheralId),
+          content: documentContent(),
+        },
       });
+
       toast.success(response.message ?? "New article version created.");
-      if (response.data?.article_id) setArticleId(String(response.data.article_id));
-      setContent("");
+      if (response.data?.article_id) {
+        setArticleId(String(response.data.article_id));
+      }
+      setTitle("");
+      setBodyHtml("");
       await loadVersions();
     } catch (error) {
       toast.error(
@@ -113,14 +131,21 @@ export function ArticleWorkspace({
 
   async function loadArticle() {
     if (!/^\d+$/.test(articleId)) return;
+    await loadArticleById(Number(articleId));
+  }
+
+  async function loadArticleById(id: number) {
+    setArticleId(String(id));
     setWorking("load");
     try {
       const response = await apiRequest<ApiEnvelope<ArticleRecord>>(
-        apiPaths.article.detail(articleId),
+        apiPaths.article.detail(id),
       );
-      setContent(response.data.content ?? "");
+      const parsed = parseArticleDocument(response.data.content ?? "");
+      setTitle(parsed.title || `Article #${id}`);
+      setBodyHtml(parsed.bodyHtml);
       setPeripheralId(String(response.data.peripheral_id));
-      toast.success(`Loaded article version ${response.data.version_number}.`);
+      toast.success(`Loaded article #${id}.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to load article.");
     } finally {
@@ -129,14 +154,14 @@ export function ArticleWorkspace({
   }
 
   async function updateArticle() {
-    if (!/^\d+$/.test(articleId) || !content.trim()) return;
+    if (!/^\d+$/.test(articleId) || !canSubmit) return;
     setWorking("update");
     try {
       const response = await apiRequest<{ message?: string }>(
         apiPaths.article.update(articleId),
         {
           method: "PUT",
-          body: { content: content.trim() },
+          body: { content: documentContent() },
         },
       );
       toast.success(response.message ?? "Article updated.");
@@ -171,8 +196,10 @@ export function ArticleWorkspace({
       !window.confirm(
         `Permanently delete article #${version.id}? This can fail when comments, ratings or bookmarks reference it.`,
       )
-    )
+    ) {
       return;
+    }
+
     setWorking(`delete-${version.id}`);
     try {
       const response = await apiRequest<{ message?: string }>(
@@ -188,12 +215,13 @@ export function ArticleWorkspace({
     }
   }
 
-  if (loading)
+  if (loading) {
     return (
       <div className="loading-panel">
         <LoaderCircle className="spin" size={24} /> Loading content workspace…
       </div>
     );
+  }
 
   return (
     <div className="workspace-stack">
@@ -201,7 +229,7 @@ export function ArticleWorkspace({
         <div className="toolbar">
           <div>
             <p className="eyebrow" style={{ color: "var(--red)" }}>
-              {createOnly ? "New version" : "Content editor"}
+              {createOnly ? "New article" : "Content editor"}
             </p>
             <h2>
               {createOnly
@@ -224,13 +252,14 @@ export function ArticleWorkspace({
                 value={peripheralId}
                 onChange={(event) => setPeripheralId(event.target.value)}
               >
-                {categories.map((category) => (
+                {categories.map((category, index) => (
                   <option key={category.id} value={category.id}>
-                    {category.id}. {category.name}
+                    {index + 1}. {category.name}
                   </option>
                 ))}
               </select>
             </div>
+
             {!createOnly ? (
               <div className="field">
                 <label className="label" htmlFor="article-id">
@@ -250,37 +279,34 @@ export function ArticleWorkspace({
                   <button
                     type="button"
                     className="icon-button"
+                    title="Load article"
                     onClick={() => void loadArticle()}
                     disabled={working !== null || !articleId}
                   >
-                    <RefreshCw size={17} />
+                    {working === "load" ? (
+                      <LoaderCircle className="spin" size={17} />
+                    ) : (
+                      <RefreshCw size={17} />
+                    )}
                   </button>
                 </div>
               </div>
             ) : null}
           </div>
-          <div className="field">
-            <label className="label" htmlFor="article-content">
-              HTML article content
-            </label>
-            <textarea
-              id="article-content"
-              className="textarea code-textarea"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              placeholder={`Write the ${selectedCategory?.name ?? "peripheral"} article as HTML or plain text.`}
-              required
-            />
-            <small className="muted">
-              Write clear, well-structured content with useful headings, examples and
-              practical explanations.
-            </small>
-          </div>
+
+          <RichTextEditor
+            title={title}
+            bodyHtml={bodyHtml}
+            disabled={working !== null}
+            onTitleChange={setTitle}
+            onBodyChange={setBodyHtml}
+          />
+
           <div className="actions">
             <button
               className="button red"
               type="submit"
-              disabled={working !== null || !content.trim()}
+              disabled={working !== null || !canSubmit}
             >
               {working === "create" ? (
                 <LoaderCircle className="spin" size={17} />
@@ -289,11 +315,12 @@ export function ArticleWorkspace({
               )}
               Create new version
             </button>
+
             {!createOnly ? (
               <button
                 className="button"
                 type="button"
-                disabled={working !== null || !articleId || !content.trim()}
+                disabled={working !== null || !articleId || !canSubmit}
                 onClick={() => void updateArticle()}
               >
                 {working === "update" ? (
@@ -304,6 +331,7 @@ export function ArticleWorkspace({
                 Update selected article
               </button>
             ) : null}
+
             {articleId ? (
               <Link
                 className="button ghost"
@@ -332,6 +360,7 @@ export function ArticleWorkspace({
               <RefreshCw size={17} /> Refresh
             </button>
           </div>
+
           <div className="responsive-table-wrap">
             <table className="data-table">
               <thead>
@@ -361,16 +390,7 @@ export function ArticleWorkspace({
                         <button
                           className="icon-button"
                           title="Load for editing"
-                          onClick={() => {
-                            setArticleId(String(version.id));
-                            void loadArticleById(
-                              version.id,
-                              setArticleId,
-                              setContent,
-                              setPeripheralId,
-                              setWorking,
-                            );
-                          }}
+                          onClick={() => void loadArticleById(version.id)}
                         >
                           <Pencil size={16} />
                         </button>
@@ -422,25 +442,13 @@ export function ArticleWorkspace({
   );
 }
 
-async function loadArticleById(
-  id: number,
-  setArticleId: (value: string) => void,
-  setContent: (value: string) => void,
-  setPeripheralId: (value: string) => void,
-  setWorking: (value: string | null) => void,
-) {
-  setArticleId(String(id));
-  setWorking("load");
-  try {
-    const response = await apiRequest<ApiEnvelope<ArticleRecord>>(
-      apiPaths.article.detail(id),
-    );
-    setContent(response.data.content ?? "");
-    setPeripheralId(String(response.data.peripheral_id));
-    toast.success(`Loaded article #${id}.`);
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : "Unable to load article.");
-  } finally {
-    setWorking(null);
-  }
+function hasMeaningfulBody(value: string): boolean {
+  const plainText = value
+    .replace(/<img\b[^>]*>/gi, " image ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return plainText.length > 0 || /<img\b/i.test(value) || /<table\b/i.test(value);
 }

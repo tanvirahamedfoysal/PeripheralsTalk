@@ -15,6 +15,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
     method: "GET",
   });
   const categories = result.ok ? result.data.data : undefined;
+  const categoryCount = categories?.length ?? 14;
 
   return (
     <PublicShell>
@@ -34,7 +35,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
           </div>
           <div className="hero-actions">
             <Link className="button red" href="/categories">
-              Explore 14 categories <ArrowRight size={18} />
+              Explore {categoryCount} categories <ArrowRight size={18} />
             </Link>
             <Link className="button ghost hero-ghost" href="/register">
               Join the community
@@ -63,7 +64,7 @@ export default async function HomePage(): Promise<React.ReactElement> {
             <p className="eyebrow" style={{ color: "var(--sand)" }}>
               Peripheral directory
             </p>
-            <h2 className="section-title">Fourteen ways to explore.</h2>
+            <h2 className="section-title">{categoryCount} ways to explore.</h2>
           </div>
           <p>
             Start with a category, learn the essential concepts and continue into

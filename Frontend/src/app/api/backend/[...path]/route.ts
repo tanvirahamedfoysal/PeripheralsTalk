@@ -19,19 +19,11 @@ async function forward(
 
   if (!isAllowedBackendRequest(request.method, normalizedPath)) {
     return NextResponse.json(
-      {
-        detail: "This action is not available.",
-      },
+      { detail: "This action is not available." },
       { status: 403 },
     );
   }
 
-  /*
-   * FastAPI distinguishes collection routes such as /category/ and /article/
-   * from their slashless forms. Next.js catch-all params omit a final slash,
-   * so preserve it from the original browser request. This avoids a 307
-   * redirect that can break replaying POST request bodies through a proxy.
-   */
   const collectionRouteNeedsSlash =
     normalizedPath === "category" || normalizedPath === "article";
   const requestedTrailingSlash = request.nextUrl.pathname.endsWith("/");
@@ -42,9 +34,8 @@ async function forward(
 
   const token = (await cookies()).get(AUTH_COOKIE)?.value;
   const headers = new Headers({ Accept: "application/json" });
-  const contentType = request.headers.get("content-type");
+  const contentType = request.headers.get("content-type") ?? "";
 
-  if (contentType) headers.set("content-type", contentType);
   if (token) headers.set("authorization", `Bearer ${token}`);
 
   const url = new URL(`${BASE_URL}${PREFIX}/${backendPath}`);
@@ -54,17 +45,14 @@ async function forward(
   const timer = setTimeout(() => controller.abort(), TIMEOUT);
 
   try {
-    const body =
-      request.method === "GET" || request.method === "HEAD"
-        ? undefined
-        : await request.arrayBuffer();
+    const body = await buildForwardBody(request, contentType, headers);
 
     const response = await fetch(url, {
       method: request.method,
       headers,
       body,
       cache: "no-store",
-      redirect: "follow",
+      redirect: "manual",
       signal: controller.signal,
     });
 
@@ -81,7 +69,7 @@ async function forward(
   } catch (error) {
     console.error("Backend proxy request failed", {
       method: request.method,
-      path: backendPath,
+      url: url.toString(),
       error,
     });
 
@@ -97,6 +85,35 @@ async function forward(
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function buildForwardBody(
+  request: NextRequest,
+  contentType: string,
+  headers: Headers,
+): Promise<BodyInit | undefined> {
+  if (request.method === "GET" || request.method === "HEAD") return undefined;
+
+  if (contentType.includes("multipart/form-data")) {
+    headers.delete("content-type");
+    return request.formData();
+  }
+
+  if (contentType.includes("application/json")) {
+    headers.set("content-type", "application/json");
+    const text = await request.text();
+    return text || undefined;
+  }
+
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    headers.set("content-type", "application/x-www-form-urlencoded");
+    const text = await request.text();
+    return text || undefined;
+  }
+
+  if (contentType) headers.set("content-type", contentType);
+  const buffer = await request.arrayBuffer();
+  return buffer.byteLength > 0 ? buffer : undefined;
 }
 
 export const GET = forward;
