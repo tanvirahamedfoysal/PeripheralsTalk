@@ -18,7 +18,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type FormEvent,
+  type KeyboardEvent,
   type MouseEvent,
 } from "react";
 import { toast } from "sonner";
@@ -117,8 +117,7 @@ export function RichTextEditor({
     requestAnimationFrame(() => restoreSelection());
   }
 
-  function insertTable(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
+  function insertTable(): void {
     if (disabled) return;
 
     const rows = Number.parseInt(tableRows, 10);
@@ -339,12 +338,23 @@ export function RichTextEditor({
             if (event.currentTarget === event.target) closeTableDialog();
           }}
         >
-          <form
+          <div
             className="editor-dialog"
             role="dialog"
             aria-modal="true"
             aria-labelledby="insert-table-title"
-            onSubmit={insertTable}
+            onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                closeTableDialog();
+                return;
+              }
+
+              if (event.key === "Enter") {
+                event.preventDefault();
+                insertTable();
+              }
+            }}
           >
             <div className="editor-dialog-heading">
               <div>
@@ -404,11 +414,11 @@ export function RichTextEditor({
               <button type="button" className="button ghost" onClick={closeTableDialog}>
                 Cancel
               </button>
-              <button type="submit" className="button">
+              <button type="button" className="button" onClick={insertTable}>
                 <Table2 size={17} /> Insert table
               </button>
             </div>
-          </form>
+          </div>
         </div>
       ) : null}
     </div>
