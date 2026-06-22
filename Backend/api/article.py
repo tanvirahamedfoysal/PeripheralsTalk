@@ -417,3 +417,43 @@ async def toggle_bookmark(article_id: int, token: str = Depends(oauth2_scheme), 
     except Exception:
         await db.rollback()
         raise HTTPException(status_code=500, detail="Failed to toggle bookmark status")
+
+
+
+# -------------------------------------
+# Current Active Artilce for Peripheral
+# -------------------------------------
+@router.get("/active-article/{peripheral_id}")
+async def rate_article(
+    peripheral_id: int, 
+    db: AsyncSession = Depends(get_db)
+):
+    """
+        Open access API to get the current active
+        article for a specific peripheral
+    """
+    try:
+        response = await db.execute(
+            text("""
+                    SELECT id as article_id, content 
+                    FROM peripheralstalk.articles 
+                    WHERE peripheral_id = :p_id AND is_active = TRUE
+                """),
+            {"p_id": int(peripheral_id)}
+        )
+        content = response.mappings().first()
+
+        if not content:
+            return {
+                "is_successful": False,
+                "message": "No active article for this peripheral",
+                "data": None
+            }
+
+        return {
+            "is_successful": True,
+            "message": "Article fetched successfully",
+            "data": content
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail="Backend Server Failure")
