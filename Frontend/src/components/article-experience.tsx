@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronUp,
   Flag,
+  Hash,
   LoaderCircle,
   MessageCircle,
   Pencil,
@@ -23,6 +24,7 @@ import { apiPaths } from "@/lib/api/paths";
 import type {
   ApiEnvelope,
   ArticleRecord,
+  CommentApiRecord,
   CommentNode,
   CommentRecord,
 } from "@/lib/api/types";
@@ -30,23 +32,40 @@ import { rememberArticle } from "@/lib/recent-articles";
 import { sanitizeArticleHtml } from "@/lib/sanitize-html";
 import { useSession } from "@/providers/session-provider";
 
+function normalizeComment(comment: CommentApiRecord): CommentRecord {
+  return {
+    id: Number(comment.comment_id),
+    parent_comment_id:
+      comment.parent_comment_id === null ? null : Number(comment.parent_comment_id),
+    content: comment.content,
+    created_at: comment.created_at,
+    updated_at: comment.updated_at,
+    is_deleted: Boolean(comment.is_deleted),
+    author_id: Number(comment.author_id),
+    author_username: comment.author_username,
+    author_name: comment.author_name,
+    upvotes: Number(comment.upvotes || 0),
+    downvotes: Number(comment.downvotes || 0),
+  };
+}
+
 function buildCommentTree(comments: CommentRecord[]): CommentNode[] {
   const map = new Map<number, CommentNode>();
   const roots: CommentNode[] = [];
 
-  for (const comment of comments) {
+  comments.forEach((comment) => {
     map.set(comment.id, { ...comment, replies: [] });
-  }
+  });
 
-  for (const comment of comments) {
+  comments.forEach((comment) => {
     const node = map.get(comment.id);
-    if (!node) continue;
+    if (!node) return;
     if (comment.parent_comment_id && map.has(comment.parent_comment_id)) {
       map.get(comment.parent_comment_id)?.replies.push(node);
     } else {
       roots.push(node);
     }
-  }
+  });
 
   return roots;
 }
@@ -57,34 +76,47 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
   const [comments, setComments] = useState<CommentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [working, setWorking] = useState<string | null>(null);
+
+  const loadComments = useCallback(async () => {
+    try {
+      const payload = await apiRequest<{ message?: string; data: CommentApiRecord[] }>(
+        apiPaths.comment.list(articleId),
+      );
+      setComments((payload.data ?? []).map(normalizeComment));
+      setCommentError(null);
+    } catch (caught) {
+      setCommentError(
+        caught instanceof Error ? caught.message : "Unable to load the discussion.",
+      );
+    }
+  }, [articleId]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [articlePayload, commentPayload] = await Promise.all([
-        apiRequest<ApiEnvelope<ArticleRecord>>(apiPaths.article.detail(articleId)),
-        apiRequest<{ message?: string; data: CommentRecord[] }>(
-          apiPaths.comment.list(articleId),
-        ),
-      ]);
+      const articlePayload = await apiRequest<ApiEnvelope<ArticleRecord>>(
+        apiPaths.article.detail(articleId),
+      );
       setArticle(articlePayload.data);
       rememberArticle(articlePayload.data);
-      setComments(commentPayload.data ?? []);
+      await loadComments();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to load article.");
     } finally {
       setLoading(false);
     }
-  }, [articleId]);
+  }, [articleId, loadComments]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   const tree = useMemo(() => buildCommentTree(comments), [comments]);
+  const privileged = session?.user.role === "ADMIN" || session?.user.role === "EDITOR";
 
   async function runAction(
     key: string,
@@ -95,7 +127,7 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
     try {
       await action();
       toast.success(successMessage);
-      await load();
+      await loadComments();
       return true;
     } catch (caught) {
       toast.error(caught instanceof Error ? caught.message : "The action failed.");
@@ -105,14 +137,15 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
     }
   }
 
-  async function submitComment() {
-    if (!commentText.trim()) return;
+  async function submitComment(): Promise<void> {
+    const content = commentText.trim();
+    if (!content) return;
     const succeeded = await runAction(
       "new-comment",
       () =>
         apiRequest(apiPaths.comment.create(articleId), {
           method: "POST",
-          body: { content: commentText.trim() },
+          body: { content },
         }),
       "Comment added.",
     );
@@ -159,14 +192,14 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
               />
             ) : (
               <span className="avatar avatar-fallback">
-                {article.author_username?.slice(0, 1).toUpperCase()}
+                {article.author_username?.slice(0, 1).toUpperCase() || "A"}
               </span>
             )}
             <div>
               <b>@{article.author_username}</b>
               <small className="muted">
                 Version {article.version_number} ·{" "}
-                {article.is_active ? "Active" : "Draft"}
+                {article.is_active ? "Published" : "Inactive"}
               </small>
             </div>
           </div>
@@ -177,6 +210,12 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
           </div>
         </div>
 
+        {privileged ? (
+          <div className="privileged-article-id">
+            <Hash size={15} /> Article ID {article.id}
+          </div>
+        ) : null}
+
         <div
           className="rich-article"
           dangerouslySetInnerHTML={{
@@ -186,10 +225,12 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
 
         <div className="article-actions-bar">
           <span className="muted">
-            Article #{article.id} · Peripheral #{article.peripheral_id}
+            {privileged
+              ? `Article #${article.id} · Peripheral #${article.peripheral_id}`
+              : "Rate, save, and discuss this lesson."}
           </span>
           {session ? (
-            <div className="actions compact">
+            <div className="actions compact wrap">
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
@@ -255,7 +296,8 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
               className="textarea"
               value={commentText}
               onChange={(event) => setCommentText(event.target.value)}
-              placeholder="Share a useful observation…"
+              placeholder="Start a useful discussion…"
+              maxLength={3000}
             />
             <button
               className="button red"
@@ -275,6 +317,10 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
             Sign in to comment, reply, vote, report, rate and bookmark.
           </div>
         )}
+
+        {commentError ? (
+          <div className="availability-message">{commentError}</div>
+        ) : null}
 
         <div className="comment-list">
           {tree.length > 0 ? (
@@ -317,7 +363,6 @@ function CommentItem({
   const [replying, setReplying] = useState(false);
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(false);
-  const [text, setText] = useState("");
   const own =
     currentUserId !== null && String(comment.author_id) === String(currentUserId);
 
@@ -360,7 +405,7 @@ function CommentItem({
           {authenticated && !comment.is_deleted ? (
             <button
               onClick={() => {
-                setReplying((v) => !v);
+                setReplying((value) => !value);
                 setEditing(false);
                 setReporting(false);
               }}
@@ -371,8 +416,7 @@ function CommentItem({
           {own && !comment.is_deleted ? (
             <button
               onClick={() => {
-                setEditing((v) => !v);
-                setText(comment.content);
+                setEditing((value) => !value);
                 setReplying(false);
                 setReporting(false);
               }}
@@ -399,7 +443,7 @@ function CommentItem({
           {authenticated && !own && !comment.is_deleted ? (
             <button
               onClick={() => {
-                setReporting((v) => !v);
+                setReporting((value) => !value);
                 setReplying(false);
                 setEditing(false);
               }}
@@ -431,7 +475,7 @@ function CommentItem({
 
         {editing ? (
           <InlineComposer
-            initialValue={text}
+            initialValue={comment.content}
             submitLabel="Save edit"
             onCancel={() => setEditing(false)}
             onSubmit={async (value) => {
@@ -451,7 +495,7 @@ function CommentItem({
 
         {reporting ? (
           <InlineComposer
-            placeholder="Explain the reason for reporting this comment"
+            placeholder="Explain why this comment should be reviewed"
             submitLabel="Submit report"
             onCancel={() => setReporting(false)}
             onSubmit={async (value) => {
@@ -511,6 +555,7 @@ function InlineComposer({
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
+        maxLength={3000}
       />
       <div className="actions compact">
         <button className="button ghost" onClick={onCancel}>

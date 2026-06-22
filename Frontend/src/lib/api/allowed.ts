@@ -6,6 +6,7 @@ const rules: Array<{ method: string; pattern: RegExp }> = [
   { method: "DELETE", pattern: /^category\/\d+$/ },
 
   { method: "GET", pattern: /^article\/\d+$/ },
+  { method: "GET", pattern: /^article\/active-article\/\d+$/ },
   { method: "POST", pattern: /^article\/?$/ },
   { method: "PUT", pattern: /^article\/\d+$/ },
   { method: "DELETE", pattern: /^article\/\d+$/ },

@@ -6,7 +6,7 @@ import { useState, type FormEvent } from "react";
 
 import { Footer } from "@/components/footer";
 import { PublicShell } from "@/components/public-shell";
-import { RecentArticles } from "@/components/recent-articles";
+import { PublishedArticles } from "@/components/published-articles";
 import { SiteHeader } from "@/components/site-header";
 
 export default function ArticlesIndexPage() {
@@ -29,10 +29,9 @@ export default function ArticlesIndexPage() {
           <p className="eyebrow" style={{ color: "var(--red)" }}>
             Direct article access
           </p>
-          <h1 className="section-title">Open an article by ID.</h1>
+          <h1 className="section-title">Search any article</h1>
           <p className="muted">
-            Enter a known article ID to open it directly, or browse the category
-            directory to discover active learning content.
+            Enter a known article ID to open it directly or browse the category directory to discover active learning content.
           </p>
           <form onSubmit={submit} className="article-id-form">
             <input
@@ -53,7 +52,7 @@ export default function ArticlesIndexPage() {
           </Link>
         </section>
 
-        <RecentArticles />
+        <PublishedArticles />
       </main>
       <Footer />
     </PublicShell>

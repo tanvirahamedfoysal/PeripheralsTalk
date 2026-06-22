@@ -1,60 +1,35 @@
-# API contract used by this frontend
+# PeripheralsTalk Frontend API Contract
 
-Only the routes found in the supplied `api.zip` are permitted by `src/lib/api/allowed.ts`.
+Base URL:
 
-## Authentication
-
-- POST `/api/v1/auth/register`
-- POST `/api/v1/auth/login`
-- POST `/api/v1/auth/validate-token`
-- POST `/api/v1/auth/request-reset-password`
-- POST `/api/v1/auth/reset-password`
-
-## Categories
-
-- GET `/api/v1/category/`
-- GET `/api/v1/category/{id}`
-- POST `/api/v1/category/`
-- PUT `/api/v1/category/{id}`
-- DELETE `/api/v1/category/{id}`
+```text
+https://peripheralstalk-106b064b.fastapicloud.dev/api/v1
+```
 
 ## Articles
 
-- GET `/api/v1/article/{article_id}`
-- POST `/api/v1/article/{article_id}`
-- GET `/api/v1/article/{category_id}/all-articles`
-- POST `/api/v1/article/{category_id}/make-active/{article_id}`
-- DELETE `/api/v1/article/{article_id}`
-- POST `/api/v1/article/{article_id}/vote`
-- POST `/api/v1/article/toggle_favourite/{article_id}`
+- `GET /article/{article_id}` — public article detail.
+- `GET /article/active-article/{peripheral_id}` — public active article ID and
+  content for one peripheral.
+- `POST /article/` — Editor/Admin create; backend assigns article ID and creates
+  an inactive version.
+- `PUT /article/{article_id}` — Editor/Admin update current content in place.
+- `GET /article/{peripheral_id}/all-articles` — Admin-only version list.
+- `POST /article/{peripheral_id}/make-active/{article_id}` — Admin-only publish.
+- `POST /article/{article_id}/rate` — authenticated rating.
+- `POST /article/{article_id}/toggle-bookmark` — authenticated bookmark toggle.
 
 ## Comments
 
-- GET/POST `/api/v1/comment/{id}`
-- PUT/DELETE `/api/v1/comment/{comment_id}`
-- POST `/api/v1/comment/{comment_id}/up-vote`
-- POST `/api/v1/comment/{comment_id}/down-vote`
-- POST `/api/v1/comment/{comment_id}/report`
+- `GET /comment/{article_id}` — public flat comment array. Each item uses
+  `comment_id` and `parent_comment_id`.
+- `POST /comment/{article_id}` — authenticated root comment.
+- `POST /comment/reply/{comment_id}` — authenticated nested reply.
+- `PUT /comment/{comment_id}` — owner update.
+- `DELETE /comment/{comment_id}` — owner soft-delete.
+- `POST /comment/{comment_id}/up-vote` — authenticated toggle.
+- `POST /comment/{comment_id}/down-vote` — authenticated toggle.
+- `POST /comment/{comment_id}/report` — authenticated report.
 
-## Profile
-
-- GET `/api/v1/profile/profile-photo`
-- GET `/api/v1/profile/all`
-- GET/PUT/DELETE `/api/v1/profile/me`
-- POST `/api/v1/profile/request-for-editor-access`
-
-## Admin
-
-- GET `/api/v1/admin/get-editor-request`
-- POST `/api/v1/admin/make-editor/{user_id}`
-- POST `/api/v1/admin/revoke-editor/{user_id}`
-- POST `/api/v1/admin/suspend-user/{user_id}`
-- POST `/api/v1/admin/unsuspend-user/{user_id}`
-- GET `/api/v1/admin/all-report`
-- POST `/api/v1/admin/resolve-report/{report_id}`
-- GET `/api/v1/admin/get-user-by-comment/{comment_id}`
-- POST `/api/v1/admin/reset-user-password/{user_id}`
-
-## Utility
-
-- POST `/api/v1/utility/upload-image`
+The frontend sends protected operations through the Next.js proxy, which reads
+the HttpOnly session cookie and forwards the JWT as a Bearer token.

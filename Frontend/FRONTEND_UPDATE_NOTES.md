@@ -1,39 +1,44 @@
-# PeripheralsTalk Frontend Update Notes
+# Frontend Update Notes
 
-## Completed frontend changes
+## API contract updates implemented
 
-- Dashboard Logout button now has readable white text and icon contrast.
-- Category numbers shown in the Admin interface are sequential display numbers, independent of PostgreSQL sequence gaps.
-- The public peripheral sidebar now loads the live category list and includes categories added after the original fourteen.
-- Newly added category pages use a generic learning-topic presentation when no predefined specification metadata exists.
-- The Articles page includes the six most recently opened articles saved in the current browser.
-- The article editor now supports a title, paragraph/heading styles, bold, italic, underline, bulleted and numbered lists, tables, and image upload/insertion.
-- The title and formatted body are serialized into the backend's single `content` text field as sanitized HTML.
-- Existing formatted articles are parsed back into the title and rich editor when loaded for editing.
-- The generic Next.js-to-FastAPI proxy now forwards JSON, URL-encoded, multipart, and binary bodies using the appropriate body type and preserves required collection trailing slashes.
-- Heading and bold text letter spacing was relaxed for improved readability.
-- Sidebar expansion and collapse transitions were smoothed.
+- Added public active-article lookup:
+  `GET /api/v1/article/active-article/{peripheral_id}`.
+- Corrected comment response mapping from backend `comment_id` to the frontend
+  comment-tree `id`.
+- Implemented top-level comments through
+  `POST /api/v1/comment/{article_id}`.
+- Implemented nested replies through
+  `POST /api/v1/comment/reply/{comment_id}`.
+- Implemented vote toggles through `up-vote` and `down-vote` routes.
+- Preserved update, soft-delete and report actions exactly as exposed by the
+  immutable backend.
 
-## Important immutable-backend limitation: comment writes
+## Public article library
 
-The frontend sends the documented authenticated request:
+The Articles page now requests all categories and resolves the active published
+article for each category. When an older deployment cannot resolve the active
+article route, it falls back to the public category article response so the
+published learning content remains browsable.
 
-```http
-POST /api/v1/comment/{article_id}
-Authorization: Bearer <token>
-Content-Type: application/json
+Inactive versions cannot be globally listed to anonymous users because the only
+version-list endpoint is Admin-protected. Direct lookup by a known article ID
+remains public, matching the backend.
 
-{"content":"..."}
-```
+## Editor and Admin article management
 
-However, the supplied immutable backend creates JWTs with a string user ID:
+- The Articles dashboard page is now an article manager rather than a permanent
+  editor form.
+- Search by article ID appears first.
+- Recent articles appear with permanent IDs and Edit buttons.
+- Edit opens a modal containing the current title and rich HTML content.
+- Updates use the Editor-compatible `PUT /article/{article_id}` endpoint.
+- Admins can publish inactive records and create articles on a separate page.
+- Editors can update any known article ID without Admin permission.
 
-```python
-"id": str(user["id"])
-```
+## Immutable-backend publication rule
 
-The comment routes then pass that string directly into PostgreSQL integer `user_id` fields without converting it to an integer. The article rating and bookmark routes already perform `int(user_id)`, but the comment routes do not.
-
-This produces the backend response `Failed to add comment`. It cannot be corrected securely from frontend code because the frontend cannot alter or re-sign the backend JWT and must not connect directly to Neon.
-
-No backend file was modified in this package.
+The uploaded backend creates new article versions with `is_active = FALSE` and
+allows only Admins to call `make-active`. The frontend therefore auto-publishes a
+new Admin-created article, but an Editor-created article still requires Admin
+publication. This rule cannot be bypassed without changing the backend.

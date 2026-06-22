@@ -153,6 +153,21 @@ export function ArticleWorkspace({
       if (generatedId) {
         setArticleId(String(generatedId));
         setCreatedArticleId(generatedId);
+
+        if (admin) {
+          try {
+            await apiRequest(apiPaths.article.activate(peripheralId, generatedId), {
+              method: "POST",
+            });
+            toast.success(`Article #${generatedId} was created and published.`);
+          } catch (activationError) {
+            toast.error(
+              activationError instanceof Error
+                ? activationError.message
+                : "The article was created but could not be published.",
+            );
+          }
+        }
       }
 
       setVersionPeripheralId(peripheralId);
@@ -396,7 +411,7 @@ export function ArticleWorkspace({
               ) : (
                 <FilePlus2 size={17} />
               )}
-              Create new version
+              {createOnly ? "Create article" : "Create new version"}
             </button>
 
             {!createOnly ? (

@@ -16,6 +16,11 @@ export interface CategoryDetailRecord extends CategoryRecord {
   article: string;
 }
 
+export interface ActiveArticleRecord {
+  article_id: number;
+  content: string;
+}
+
 export interface ArticleRecord {
   id: number;
   peripheral_id: number;
@@ -37,12 +42,28 @@ export interface ArticleVersionRecord {
   created_by: number;
 }
 
+/** Exact object returned by GET /comment/{article_id}. */
+export interface CommentApiRecord {
+  comment_id: number;
+  parent_comment_id: number | null;
+  content: string;
+  created_at: string;
+  updated_at: string | null;
+  is_deleted: boolean;
+  author_id: number;
+  author_username: string;
+  author_name: string;
+  upvotes: number | string;
+  downvotes: number | string;
+}
+
+/** Normalized shape used by the React comment tree. */
 export interface CommentRecord {
   id: number;
   parent_comment_id: number | null;
   content: string;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
   is_deleted: boolean;
   author_id: number;
   author_username: string;

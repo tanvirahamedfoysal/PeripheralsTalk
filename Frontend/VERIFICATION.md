@@ -1,17 +1,19 @@
 # Verification
 
-- Prettier formatting: passed
-- TypeScript (`tsc --noEmit`): passed
-- Next.js 16.2.9 production compilation with webpack: passed
-- Static generation: 39 application routes generated
-- Package excludes `.next` and `node_modules`
+The following checks were completed in the generated package:
 
-## Backend-dependent verification
+- Prettier formatting: PASS
+- TypeScript/TSX syntax parsing across all source files: PASS
+- Internal `@/` and relative import resolution: PASS
+- No `.next` directory included
+- No `node_modules` directory included
+- No backend source files included or modified
+- No Neon database credentials included
 
-The frontend request shapes match the uploaded immutable FastAPI source. Live production mutation testing was not performed from the build container. Comment mutation is known to fail in the supplied backend because JWT user IDs are strings while the comment SQL writes them to integer columns without conversion. See `FRONTEND_UPDATE_NOTES.md`.
+Run the full framework checks after installing dependencies:
 
-## Latest table-dialog verification
-
-- Rich-text editor TSX transpilation: PASS
-- Nested form search in `rich-text-editor.tsx`: PASS (no form element remains)
-- Table dialog supports mouse insertion, Enter insertion, and Escape cancellation.
+```powershell
+pnpm typecheck
+pnpm lint
+pnpm build
+```

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, Layers3 } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers3, MessageCircle } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Footer } from "@/components/footer";
@@ -7,6 +7,7 @@ import { PublicShell } from "@/components/public-shell";
 import { SiteHeader } from "@/components/site-header";
 import { backendErrorMessage, fastApi } from "@/lib/api/server";
 import type {
+  ActiveArticleRecord,
   ApiEnvelope,
   CategoryDetailRecord,
   CategoryRecord,
@@ -24,9 +25,12 @@ export default async function CategoryPage({
   const { id } = await params;
   if (!/^\d+$/.test(id)) notFound();
 
-  const [listResult, detailResult] = await Promise.all([
+  const [listResult, detailResult, activeResult] = await Promise.all([
     fastApi<ApiEnvelope<CategoryRecord[]>>("category/", { method: "GET" }),
     fastApi<ApiEnvelope<CategoryDetailRecord>>(`category/${id}`, {
+      method: "GET",
+    }),
+    fastApi<ApiEnvelope<ActiveArticleRecord | null>>(`article/active-article/${id}`, {
       method: "GET",
     }),
   ]);
@@ -41,6 +45,7 @@ export default async function CategoryPage({
   if (!documented && !liveRecord) notFound();
 
   const live = detailResult.ok ? detailResult.data.data : null;
+  const activeArticle = activeResult.ok ? activeResult.data.data : null;
   const Icon = documented?.icon ?? Layers3;
   const name = live?.name ?? liveRecord?.name ?? documented?.name ?? "Peripheral";
   const summary =
@@ -57,86 +62,79 @@ export default async function CategoryPage({
   return (
     <PublicShell>
       <SiteHeader />
-      <header className="category-hero detail">
+
+      <header className="category-hero detail compact-category-hero">
         <div className="category-hero-copy">
           <Link href="/categories" className="category-back-link">
             <ArrowLeft size={15} /> All categories
           </Link>
-          <p className="eyebrow category-kicker">
-            Category {String(position).padStart(2, "0")}
-          </p>
-          <h1 className="display">{name}.</h1>
-          <p className="category-intro">{summary}</p>
+          <div className="compact-category-heading">
+            <div className="category-icon compact-category-icon">
+              <Icon size={30} strokeWidth={1.55} />
+            </div>
+            <div>
+              <p className="eyebrow category-kicker">
+                Category {String(position).padStart(2, "0")}
+              </p>
+              <h1 className="display">{name}.</h1>
+              <p className="category-intro">{summary}</p>
+            </div>
+          </div>
         </div>
-        <aside className="category-identity-card">
-          <div className="category-icon category-detail-icon">
-            <Icon size={43} strokeWidth={1.45} />
-          </div>
-          <div>
-            <p className="eyebrow muted">Learning topic</p>
-            <h2>
-              {documented
-                ? `${documented.specs.length} structured fields`
-                : "Community learning category"}
-            </h2>
-          </div>
-          <div className="category-stat-row">
-            <span>
-              <Layers3 size={17} /> Organized topic
-            </span>
-            <span>
-              <BookOpenCheck size={17} /> Guided learning content
-            </span>
-          </div>
-        </aside>
       </header>
 
-      <main className="article-shell category-content">
-        {documented ? (
-          <section className="dashboard-section category-spec-section">
-            <div className="toolbar">
-              <div>
-                <p className="eyebrow" style={{ color: "var(--teal)" }}>
-                  Technical vocabulary
-                </p>
-                <h2>Structured specifications</h2>
-              </div>
-              <span className="status aqua">{documented.specs.length} fields</span>
+      <main className="article-shell category-content compact-category-content">
+        <section className="dashboard-section category-spec-section">
+          <div className="toolbar">
+            <div>
+              <p className="eyebrow" style={{ color: "var(--teal)" }}>
+                Structured specifications
+              </p>
+              <h2>What to compare</h2>
             </div>
-            <div className="spec-grid">
+            <span className="status aqua">
+              {documented?.specs.length ?? 0} specifications
+            </span>
+          </div>
+
+          {documented ? (
+            <div className="spec-grid expanded-spec-grid">
               {documented.specs.map((spec, index) => (
                 <div className="spec-row" key={spec}>
                   <span className="spec-index">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <b>{spec}</b>
-                  <span className="muted">Category field</span>
                 </div>
               ))}
             </div>
-          </section>
-        ) : (
-          <section className="dashboard-section category-spec-section">
-            <p className="eyebrow" style={{ color: "var(--teal)" }}>
-              Learning pathway
-            </p>
-            <h2>Start with the active article</h2>
-            <p className="muted" style={{ marginBottom: 0 }}>
-              This newly added category will grow as Editors publish and refine its
-              learning material.
-            </p>
-          </section>
-        )}
+          ) : (
+            <div className="notice">
+              Specifications for this newly added category will appear as its learning
+              guide develops.
+            </div>
+          )}
+        </section>
 
-        <section className="dashboard-section">
+        <section className="dashboard-section active-article-section">
           <div className="toolbar">
             <div>
               <p className="eyebrow muted">Active knowledge article</p>
               <h2>{name}</h2>
             </div>
-            <span className={`status ${articleAvailable ? "aqua" : "red"}`}>
-              {articleAvailable ? "Available" : "Unavailable"}
-            </span>
+            <div className="actions compact">
+              <span className={`status ${articleAvailable ? "aqua" : "red"}`}>
+                {articleAvailable ? "Available" : "Unavailable"}
+              </span>
+              {activeArticle?.article_id ? (
+                <Link
+                  className="button compact-button"
+                  href={`/articles/${activeArticle.article_id}`}
+                >
+                  <MessageCircle size={16} /> Read and discuss
+                </Link>
+              ) : null}
+            </div>
           </div>
 
           {articleAvailable && live?.article ? (
@@ -146,17 +144,20 @@ export default async function CategoryPage({
             />
           ) : (
             <div className="availability-message">
-              <b>Unavailable</b>
-              <p>
-                {backendErrorMessage(
-                  detailResult.data,
-                  `${name} does not currently have an active article.`,
-                )}
-              </p>
-              <small className="muted">
-                Check again later or explore another category from the learning
-                directory.
-              </small>
+              <BookOpen size={19} />
+              <div>
+                <b>Unavailable</b>
+                <p>
+                  {backendErrorMessage(
+                    detailResult.data,
+                    `${name} does not currently have an active article.`,
+                  )}
+                </p>
+                <small className="muted">
+                  Check again later or explore another category from the learning
+                  directory.
+                </small>
+              </div>
             </div>
           )}
         </section>

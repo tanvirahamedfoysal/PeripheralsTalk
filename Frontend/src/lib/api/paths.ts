@@ -8,6 +8,7 @@ export const apiPaths = {
   },
   article: {
     detail: (id: string | number) => `article/${id}`,
+    active: (peripheralId: string | number) => `article/active-article/${peripheralId}`,
     create: "article/",
     update: (id: string | number) => `article/${id}`,
     versions: (peripheralId: string | number) => `article/${peripheralId}/all-articles`,

@@ -1,59 +1,17 @@
-# Fixes in this release
+# Completed Frontend Changes
 
-## Visual design
-
-- Replaced the old striped/flag-style home illustration with `public/study.jpg`.
-- Replaced the same visual treatment on Login, Register, Forgot Password,
-  Reset Password, and Change Password pages.
-- Applied the new five-color evergreen/sage/gold/cloud palette.
-- Replaced the serif-heavy typography with modern display and body sans-serif
-  stacks.
-
-## Interaction
-
-- The profile dropdown remains open for 1.5 seconds after the pointer leaves the
-  profile button.
-- Entering the dropdown cancels the pending close timer.
-- Keyboard focus continues to keep the dropdown open.
-- Sidebar width, page offset, labels and links now animate with a longer,
-  smoother easing curve.
-
-## Category and article writes
-
-FastAPI defines collection writes at routes ending in `/`:
-
-```text
-POST /api/v1/category/
-POST /api/v1/article/
-```
-
-Next.js catch-all route parameters remove a final slash. The previous proxy
-therefore forwarded the write requests to slashless routes, which could trigger
-an HTTP redirect while replaying the POST body and surface as a temporary
-service-unavailable error.
-
-The proxy now restores the required trailing slash for the Category and Article
-collection routes before forwarding the request. It also explicitly includes
-same-origin credentials and allows up to 60 seconds for normal cloud requests.
-
-No backend code was changed.
-
-## Latest refinement
-
-- Sequential category display numbering despite database ID gaps.
-- Live custom categories in the public sidebar and category directory.
-- Custom category detail support.
-- Readable Dashboard Logout action.
-- Six recently opened article cards after the article-ID finder.
-- Rich HTML article authoring with title, bold, italic, underline, lists, tables and uploaded images.
-- Improved request-body forwarding for article/category writes.
-- Relaxed letter spacing and smoother sidebar transitions.
-- Documented the immutable backend defect that prevents comment mutation requests from completing.
-
-## Table dialog hydration fix
-
-- Removed the nested `<form>` from `RichTextEditor` because the editor is already rendered inside the article workspace form.
-- Replaced the table settings form with an accessible dialog container and explicit button handling.
-- Added Enter-to-insert and Escape-to-close keyboard support.
-- Preserved the saved editor selection so the generated table is inserted at the cursor position.
-- Removed the React/Next.js hydration error: `In HTML, <form> cannot be a descendant of <form>`.
+- Added public published-article browsing for every category with an active article.
+- Kept direct public article lookup by permanent database article ID.
+- Corrected backend comment objects from `comment_id` into a stable nested tree.
+- Added root comments, nested replies, edit, delete, report, upvote and downvote actions.
+- Restricted write actions to authenticated users while keeping discussions public.
+- Hid article IDs from ordinary readers and displayed them to Editors/Admins.
+- Replaced the Editor/Admin edit screen with search, recent articles and Edit buttons.
+- Added a rich-text editing modal preloaded with the current article document.
+- Added a separate Admin article-creation route.
+- Preserved database-assigned IDs as read-only values.
+- Compact category hero replaces the oversized two-card header.
+- Removed the redundant structured-fields summary card.
+- Expanded the original fourteen categories to eight useful comparison specifications each.
+- Added an article discussion link when the public active-article endpoint returns an ID.
+- Raised the table chooser above the article-editing modal.

@@ -46,6 +46,7 @@ const navs: Record<UserRole, { href: string; label: string; icon: typeof Home }[
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/categories", label: "Categories", icon: Tags },
     { href: "/admin/articles", label: "Articles", icon: BookOpen },
+    { href: "/admin/articles/new", label: "Write article", icon: FilePlus2 },
     { href: "/admin/editor-requests", label: "Editor requests", icon: ShieldCheck },
     { href: "/admin/reports", label: "Reports", icon: Flag },
     { href: "/admin/settings", label: "Settings", icon: Settings },
