@@ -321,7 +321,7 @@ async def resolve_report(report_id: int, token: str = Depends(oauth2_scheme), db
             detail=access.get("message", "Invalid or expired token")
         )
     
-    admin_id = access["id"]
+    admin_id = int(access["id"])
 
     report_record = await db.execute(
         text("SELECT id, status FROM peripheralstalk.reports WHERE id = :report_id"),

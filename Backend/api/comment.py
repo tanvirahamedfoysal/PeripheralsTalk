@@ -46,7 +46,7 @@ async def create_comment(
                 VALUES (:article_id, :user_id, :content)
                 RETURNING id, content, created_at
             """),
-            {"article_id": article_id, "user_id": user_id, "content": payload.content}
+            {"article_id": int(article_id), "user_id": int(user_id), "content": payload.content}
         )
         new_comment = result.mappings().first()
         await db.commit()
@@ -70,7 +70,7 @@ async def get_comments(article_id: int, db: AsyncSession = Depends(get_db)):
         result = await db.execute(
             text("""
                 SELECT 
-                    c.id, c.parent_comment_id, c.content, c.created_at, c.updated_at, c.is_deleted,
+                    c.id as comment_id, c.parent_comment_id, c.content, c.created_at, c.updated_at, c.is_deleted,
                     u.id AS author_id, u.username AS author_username, u.name AS author_name,
                     COALESCE(v.upvotes, 0) AS upvotes,
                     COALESCE(v.downvotes, 0) AS downvotes
@@ -143,9 +143,9 @@ async def create_nested_comment(
                 RETURNING id, parent_comment_id, content, created_at
             """),
             {
-                "article_id": parent_comment["article_id"], 
-                "user_id": user_id, 
-                "parent_id": comment_id,
+                "article_id": int(parent_comment["article_id"]), 
+                "user_id": int(user_id), 
+                "parent_id": int(comment_id),
                 "content": payload.content
             }
         )
@@ -237,7 +237,7 @@ async def update_comment(
     if comment["is_deleted"]:
         raise HTTPException(status_code=400, detail="Cannot edit a deleted comment")
 
-    if comment["user_id"] != user_id:
+    if comment["user_id"] != int(user_id):
         raise HTTPException(status_code=403, detail="You can only edit your own comments")
 
     try:
@@ -268,11 +268,9 @@ async def up_vote_comment(comment_id: int, token: str = Depends(oauth2_scheme), 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=access.get("message", "Invalid or expired token")
         )
-        
-    user_id = access["id"]
+    user_id = int(access["id"])
 
     try:
-        # Check existing vote
         vote_check = await db.execute(
             text("SELECT vote_type FROM peripheralstalk.comment_votes WHERE comment_id = :c_id AND user_id = :u_id"),
             {"c_id": comment_id, "u_id": user_id}
@@ -318,7 +316,7 @@ async def down_vote_comment(comment_id: int, token: str = Depends(oauth2_scheme)
             detail=access.get("message", "Invalid or expired token")
         )
         
-    user_id = access["id"]
+    user_id = int(access["id"])
 
     try:
         vote_check = await db.execute(
@@ -371,7 +369,7 @@ async def report_comment(
             detail=access.get("message", "Invalid or expired token")
         )
         
-    reporter_id = access["id"]
+    reporter_id = int(access["id"])
 
     comment_check = await db.execute(
         text("SELECT id, user_id FROM peripheralstalk.comments WHERE id = :comment_id"),

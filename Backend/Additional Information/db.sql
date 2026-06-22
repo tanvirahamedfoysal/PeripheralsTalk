@@ -104,7 +104,6 @@ CREATE TYPE peripheralstalk.report_status AS ENUM (
     'PENDING',
     'RESOLVED'
 );
-
 CREATE TABLE peripheralstalk.reports (
     id SERIAL PRIMARY KEY,
     reporter_id INTEGER REFERENCES peripheralstalk.users(id),

@@ -424,7 +424,7 @@ async def toggle_bookmark(article_id: int, token: str = Depends(oauth2_scheme), 
 # Current Active Artilce for Peripheral
 # -------------------------------------
 @router.get("/active-article/{peripheral_id}")
-async def rate_article(
+async def current_active_article(
     peripheral_id: int, 
     db: AsyncSession = Depends(get_db)
 ):
