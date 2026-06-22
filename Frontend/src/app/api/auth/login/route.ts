@@ -4,7 +4,7 @@ import { backendErrorMessage, fastApi } from "@/lib/api/server";
 import type { ApiEnvelope, ProfileRecord } from "@/lib/api/types";
 import { AUTH_COOKIE, cookieOptions } from "@/lib/auth/cookie";
 import { decodeJwt } from "@/lib/auth/jwt";
-import { normalizeRole, roleHome } from "@/lib/auth/types";
+import { normalizeRole } from "@/lib/auth/types";
 
 const AUTH_TIMEOUT_MS = Number(process.env.FASTAPI_AUTH_TIMEOUT_MS || 90000);
 
@@ -78,7 +78,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const response = NextResponse.json({
     message: result.data.message ?? "Login successful",
-    redirectTo: roleHome(role),
+    redirectTo: "/",
     session: {
       user: {
         id: String(profile?.id ?? result.data.user.id ?? jwt.id ?? ""),

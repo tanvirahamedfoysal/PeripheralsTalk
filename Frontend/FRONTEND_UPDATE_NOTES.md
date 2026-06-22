@@ -1,44 +1,26 @@
 # Frontend Update Notes
 
-## API contract updates implemented
+This build adapts the frontend to the uploaded immutable `Backend(4).zip`. No backend source file or database record was modified.
 
-- Added public active-article lookup:
-  `GET /api/v1/article/active-article/{peripheral_id}`.
-- Corrected comment response mapping from backend `comment_id` to the frontend
-  comment-tree `id`.
-- Implemented top-level comments through
-  `POST /api/v1/comment/{article_id}`.
-- Implemented nested replies through
-  `POST /api/v1/comment/reply/{comment_id}`.
-- Implemented vote toggles through `up-vote` and `down-vote` routes.
-- Preserved update, soft-delete and report actions exactly as exposed by the
-  immutable backend.
+## Completed
 
-## Public article library
+- Removed the oversized category hero panel and replaced it with a compact category title strip.
+- Kept article formatting controls pinned inside the edit modal while its content scrolls.
+- Removed Overview and Media from dashboard navigation. Legacy URLs redirect to useful pages.
+- Login and registration return users to the public home page.
+- Added Editor/Admin article editing from every article reader, including category pages.
+- Reused one article experience component so article content, rating, comments, replies, votes, reports, favorites and privileged editing behave consistently regardless of entry route.
+- Added nested comments from the backend's flat `parent_comment_id` records.
+- Added comment create, reply, edit, delete, upvote, downvote and report actions.
+- Added rating-state and comment-vote-state checks.
+- Added favorite/bookmark toggling through the backend endpoint.
+- Added a Saved Articles dashboard with the message `Saved to dashboard.` after a successful bookmark.
+- Public Articles lists active articles discoverable through the public category and active-article endpoints, while direct article-ID lookup remains available.
+- Article IDs remain visible only to Editor and Admin accounts.
 
-The Articles page now requests all categories and resolves the active published
-article for each category. When an older deployment cannot resolve the active
-article route, it falls back to the public category article response so the
-published learning content remains browsable.
+## Immutable backend constraints
 
-Inactive versions cannot be globally listed to anonymous users because the only
-version-list endpoint is Admin-protected. Direct lookup by a known article ID
-remains public, matching the backend.
-
-## Editor and Admin article management
-
-- The Articles dashboard page is now an article manager rather than a permanent
-  editor form.
-- Search by article ID appears first.
-- Recent articles appear with permanent IDs and Edit buttons.
-- Edit opens a modal containing the current title and rich HTML content.
-- Updates use the Editor-compatible `PUT /article/{article_id}` endpoint.
-- Admins can publish inactive records and create articles on a separate page.
-- Editors can update any known article ID without Admin permission.
-
-## Immutable-backend publication rule
-
-The uploaded backend creates new article versions with `is_active = FALSE` and
-allows only Admins to call `make-active`. The frontend therefore auto-publishes a
-new Admin-created article, but an Editor-created article still requires Admin
-publication. This rule cannot be bypassed without changing the backend.
+- New article versions are inserted with `is_active = FALSE` by the backend.
+- The uploaded backend allows only an Admin to call the make-active endpoint. The frontend attempts immediate activation after creation; Editor activation will succeed only if the deployed backend authorization has been changed to allow it.
+- The backend exposes bookmark toggle but no endpoint to list the current user's bookmarks. After a successful cloud bookmark toggle, the frontend stores a local per-user display mirror so the article appears in that browser's dashboard. The bookmark itself is still written to Neon by FastAPI.
+- The backend has no public global article-list endpoint. The public library discovers active articles by loading categories and their active article records. Any valid article ID can still be opened directly.

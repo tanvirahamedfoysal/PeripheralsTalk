@@ -154,19 +154,17 @@ export function ArticleWorkspace({
         setArticleId(String(generatedId));
         setCreatedArticleId(generatedId);
 
-        if (admin) {
-          try {
-            await apiRequest(apiPaths.article.activate(peripheralId, generatedId), {
-              method: "POST",
-            });
-            toast.success(`Article #${generatedId} was created and published.`);
-          } catch (activationError) {
-            toast.error(
-              activationError instanceof Error
-                ? activationError.message
-                : "The article was created but could not be published.",
-            );
-          }
+        try {
+          await apiRequest(apiPaths.article.activate(peripheralId, generatedId), {
+            method: "POST",
+          });
+          toast.success(`Article #${generatedId} was created and published.`);
+        } catch (activationError) {
+          toast.warning(
+            activationError instanceof Error
+              ? `Article #${generatedId} was created, but the live service did not allow it to be activated: ${activationError.message}`
+              : `Article #${generatedId} was created but could not be activated.`,
+          );
         }
       }
 

@@ -16,6 +16,7 @@ export const apiPaths = {
       `article/${peripheralId}/make-active/${articleId}`,
     remove: (id: string | number) => `article/${id}`,
     rate: (id: string | number) => `article/${id}/rate`,
+    isRated: (id: string | number) => `article/${id}/is-rated`,
     bookmark: (id: string | number) => `article/${id}/toggle-bookmark`,
   },
   comment: {
@@ -27,6 +28,7 @@ export const apiPaths = {
     up: (commentId: string | number) => `comment/${commentId}/up-vote`,
     down: (commentId: string | number) => `comment/${commentId}/down-vote`,
     report: (commentId: string | number) => `comment/${commentId}/report`,
+    isVoted: (commentId: string | number) => `comment/is-voted/${commentId}`,
   },
   profile: {
     photo: "profile/profile-photo",

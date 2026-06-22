@@ -13,6 +13,7 @@ const rules: Array<{ method: string; pattern: RegExp }> = [
   { method: "GET", pattern: /^article\/\d+\/all-articles$/ },
   { method: "POST", pattern: /^article\/\d+\/make-active\/\d+$/ },
   { method: "POST", pattern: /^article\/\d+\/rate$/ },
+  { method: "GET", pattern: /^article\/\d+\/is-rated$/ },
   { method: "POST", pattern: /^article\/\d+\/toggle-bookmark$/ },
 
   { method: "GET", pattern: /^comment\/\d+$/ },
@@ -21,6 +22,7 @@ const rules: Array<{ method: string; pattern: RegExp }> = [
   { method: "PUT", pattern: /^comment\/\d+$/ },
   { method: "DELETE", pattern: /^comment\/\d+$/ },
   { method: "POST", pattern: /^comment\/\d+\/(up-vote|down-vote|report)$/ },
+  { method: "GET", pattern: /^comment\/is-voted\/\d+$/ },
 
   { method: "GET", pattern: /^profile\/profile-photo$/ },
   { method: "POST", pattern: /^profile\/validate-username$/ },

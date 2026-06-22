@@ -21,7 +21,7 @@ export function normalizeRole(value: unknown): UserRole | null {
 }
 
 export function roleHome(role: UserRole): string {
-  if (role === "ADMIN") return "/admin";
-  if (role === "EDITOR") return "/editor";
-  return "/dashboard";
+  if (role === "ADMIN") return "/admin/users";
+  if (role === "EDITOR") return "/editor/articles";
+  return "/dashboard/profile";
 }

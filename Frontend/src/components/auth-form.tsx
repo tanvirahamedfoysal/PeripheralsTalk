@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
@@ -77,7 +77,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
 function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { setSession } = useSession();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -107,8 +106,7 @@ function LoginForm() {
       }
 
       if (payload.session) setSession(payload.session);
-      const callback = searchParams.get("callbackUrl");
-      router.replace(callback || payload.redirectTo || "/dashboard");
+      router.replace("/");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to sign in.");
@@ -319,7 +317,7 @@ function RegisterForm() {
 
       countdown.clear();
       if (payload.session) setSession(payload.session);
-      router.replace(payload.redirectTo || "/dashboard");
+      router.replace("/");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Registration failed.");

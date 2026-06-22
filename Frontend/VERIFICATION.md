@@ -1,18 +1,16 @@
 # Verification
 
-The following checks were completed in the generated package:
+- TypeScript/TSX syntax transpilation: PASS
+- Internal `@/` import resolution: PASS
+- Uploaded backend route contract reviewed: PASS
+- No backend files included or modified: PASS
+- No Admin credentials or Neon connection string included: PASS
+- `.next`, `node_modules`, and TypeScript build cache excluded: PASS
 
-- Prettier formatting: PASS
-- TypeScript/TSX syntax parsing across all source files: PASS
-- Internal `@/` and relative import resolution: PASS
-- No `.next` directory included
-- No `node_modules` directory included
-- No backend source files included or modified
-- No Neon database credentials included
-
-Run the full framework checks after installing dependencies:
+Run the complete local checks after installing dependencies:
 
 ```powershell
+pnpm install
 pnpm typecheck
 pnpm lint
 pnpm build

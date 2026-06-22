@@ -28,7 +28,7 @@ const navigationItems = [
   { href: "/contact", label: "Contact" },
 ];
 
-const PROFILE_CLOSE_DELAY_MS = 200;
+const PROFILE_CLOSE_DELAY_MS = 1500;
 
 function roleSettings(role: UserRole): string {
   if (role === "ADMIN") return "/admin/settings";

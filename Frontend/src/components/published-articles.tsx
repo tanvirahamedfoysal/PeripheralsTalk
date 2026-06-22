@@ -191,7 +191,7 @@ export function PublishedArticles(): React.ReactElement {
                       ? `@${record.article.author_username}`
                       : "Published learning content"}
                   </span>
-                  {record.article ? (
+                  {session && record.article ? (
                     <span className="published-rating">
                       <Star size={14} fill="currentColor" />
                       {Number(record.article.average_rating || 0).toFixed(1)}

@@ -6,10 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   Bookmark,
-  CircleGauge,
   FilePlus2,
   Flag,
-  FolderKanban,
   Home,
   LogOut,
   MessageSquare,
@@ -26,23 +24,19 @@ import { Brand } from "./brand";
 
 const navs: Record<UserRole, { href: string; label: string; icon: typeof Home }[]> = {
   USER: [
-    { href: "/dashboard", label: "Overview", icon: CircleGauge },
     { href: "/dashboard/profile", label: "Profile", icon: UserCog },
-    { href: "/dashboard/bookmarks", label: "Article tools", icon: Bookmark },
+    { href: "/dashboard/bookmarks", label: "Saved articles", icon: Bookmark },
     { href: "/dashboard/comments", label: "Discussions", icon: MessageSquare },
     { href: "/dashboard/editor-request", label: "Editor request", icon: ShieldCheck },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ],
   EDITOR: [
-    { href: "/editor", label: "Overview", icon: CircleGauge },
     { href: "/editor/articles", label: "Articles", icon: BookOpen },
     { href: "/editor/articles/new", label: "Write article", icon: FilePlus2 },
-    { href: "/editor/media", label: "Media", icon: FolderKanban },
     { href: "/editor/moderation", label: "Community standards", icon: Flag },
     { href: "/editor/settings", label: "Settings", icon: Settings },
   ],
   ADMIN: [
-    { href: "/admin", label: "Overview", icon: CircleGauge },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/categories", label: "Categories", icon: Tags },
     { href: "/admin/articles", label: "Articles", icon: BookOpen },
@@ -71,7 +65,7 @@ export function DashboardShell({
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.assign("/login");
+    window.location.assign("/");
   }
 
   return (

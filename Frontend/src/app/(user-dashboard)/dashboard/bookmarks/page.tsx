@@ -4,9 +4,9 @@ import { DashboardPage } from "@/components/dashboard-page";
 export default function UserBookmarksPage() {
   return (
     <DashboardPage
-      eyebrow="Article interaction"
-      title="Bookmarks and ratings."
-      description="Save useful articles for later and rate lessons after you have explored their content."
+      eyebrow="Saved learning"
+      title="Your favorite articles."
+      description="Keep useful articles close and return to them whenever you need a refresher."
     >
       <ArticleQuickTools mode="bookmark" />
     </DashboardPage>

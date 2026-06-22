@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { backendErrorMessage, fastApi } from "@/lib/api/server";
 import { AUTH_COOKIE, cookieOptions } from "@/lib/auth/cookie";
 import { decodeJwt } from "@/lib/auth/jwt";
-import { normalizeRole, roleHome } from "@/lib/auth/types";
+import { normalizeRole } from "@/lib/auth/types";
 
 const AUTH_TIMEOUT_MS = Number(process.env.FASTAPI_AUTH_TIMEOUT_MS || 90000);
 
@@ -77,7 +77,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const jwt = decodeJwt(token);
   const response = NextResponse.json({
     message: result.data.message ?? "Account created successfully.",
-    redirectTo: roleHome(role),
+    redirectTo: "/",
     session: {
       user: {
         id: String(result.data.user.id ?? jwt.id ?? ""),
