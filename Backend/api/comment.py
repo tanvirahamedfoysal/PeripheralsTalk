@@ -403,3 +403,60 @@ async def report_comment(
     except Exception:
         await db.rollback()
         raise HTTPException(status_code=500, detail="Failed to submit report")
+    
+
+# --------------------------------------------
+# To check if a comment is voted by user(self)
+# --------------------------------------------
+@router.get("/is-voted/{comment_id}")
+async def check_is_voted(
+    comment_id: int, 
+    token: str = Depends(oauth2_scheme), 
+    db: AsyncSession = Depends(get_db)
+):
+    access = validate_user_access(token)
+    if not access.get("has_access"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=access.get("message", "Invalid or expired token")
+        )
+    user_id = int(access["id"])
+
+    try:
+        # Check if a vote exists for this specific user and comment
+        result = await db.execute(
+            text("""
+                SELECT vote_type 
+                FROM peripheralstalk.comment_votes 
+                WHERE comment_id = :comment_id AND user_id = :user_id
+            """),
+            {"comment_id": comment_id, "user_id": user_id}
+        )
+        
+        user_vote = result.mappings().first()
+
+        # If a record is found, return the vote details
+        if user_vote:
+            return {
+                "is_successful": True,
+                "message": "User vote retrieved successfully",
+                "data": {
+                    "is_voted": True,
+                    "vote_type": user_vote["vote_type"]  # Will return 'UPVOTE' or 'DOWNVOTE'
+                }
+            }
+        
+        # If no record is found, the user hasn't voted
+        return {
+            "is_successful": True,
+            "message": "User has not voted on this comment",
+            "data": {
+                "is_voted": False,
+                "vote_type": None
+            }
+        }
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to check comment vote status")
+
+

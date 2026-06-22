@@ -457,3 +457,54 @@ async def current_active_article(
         }
     except Exception:
         raise HTTPException(status_code=500, detail="Backend Server Failure")
+
+
+# --------------------------------------------
+# To check is this article liked by user(self)
+# --------------------------------------------
+@router.get("/{article_id}/is-rated")
+async def check_is_rated(article_id: int, token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+    access = validate_user_access(token)
+    if not access.get("has_access"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=access.get("message", "Invalid or expired token")
+        )
+    user_id = int(access["id"])
+
+    try:
+        # Check if a rating exists for this specific user and article
+        result = await db.execute(
+            text("""
+                SELECT rating 
+                FROM peripheralstalk.article_ratings 
+                WHERE article_id = :article_id AND user_id = :user_id
+            """),
+            {"article_id": int(article_id), "user_id": int(user_id)}
+        )
+        
+        user_rating = result.mappings().first()
+
+        # If a record is found, return the rating details
+        if user_rating:
+            return {
+                "is_successful": True,
+                "message": "User rating retrieved successfully",
+                "data": {
+                    "is_rated": True,
+                    "rating": user_rating["rating"]
+                }
+            }
+        
+        # If no record is found, the user hasn't rated it
+        return {
+            "is_successful": True,
+            "message": "User has not rated this article",
+            "data": {
+                "is_rated": False,
+                "rating": None
+            }
+        }
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to check article rating status")

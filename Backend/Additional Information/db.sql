@@ -90,7 +90,6 @@ CREATE TYPE peripheralstalk.comment_vote_type AS ENUM (
     'UPVOTE',
     'DOWNVOTE'
 );
-
 CREATE TABLE peripheralstalk.comment_votes (
     id SERIAL PRIMARY KEY,
     comment_id INTEGER REFERENCES peripheralstalk.comments(id),
