@@ -21,13 +21,11 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
 import { RichTextEditor } from "@/components/rich-text-editor";
-import {
-  parseArticleDocument,
-  serializeArticleDocument,
-} from "@/lib/article-document";
+import { parseArticleDocument, serializeArticleDocument } from "@/lib/article-document";
 import { apiRequest } from "@/lib/api/client";
 import { apiPaths } from "@/lib/api/paths";
 import type {
@@ -195,6 +193,25 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
     }
   }, [article, session]);
 
+  useEffect(() => {
+    if (!editing) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleEscape(event: globalThis.KeyboardEvent): void {
+      if (event.key === "Escape" && !savingEdit) {
+        setEditing(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [editing, savingEdit]);
+
   const tree = useMemo(() => buildCommentTree(comments), [comments]);
 
   async function submitComment(): Promise<void> {
@@ -282,7 +299,9 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
       setEditing(false);
       toast.success(response.message ?? `Article #${article.id} updated.`);
     } catch (caught) {
-      toast.error(caught instanceof Error ? caught.message : "Unable to update article.");
+      toast.error(
+        caught instanceof Error ? caught.message : "Unable to update article.",
+      );
     } finally {
       setSavingEdit(false);
     }
@@ -334,7 +353,8 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
             <div>
               <b>@{article.author_username}</b>
               <small className="muted">
-                Version {article.version_number} · {article.is_active ? "Published" : "Inactive"}
+                Version {article.version_number} ·{" "}
+                {article.is_active ? "Published" : "Inactive"}
               </small>
             </div>
           </div>
@@ -385,7 +405,10 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
                     disabled={working !== null}
                     onClick={() => void rateArticle(value)}
                   >
-                    <Star size={16} fill={userRating && value <= userRating ? "currentColor" : "none"} />
+                    <Star
+                      size={16}
+                      fill={userRating && value <= userRating ? "currentColor" : "none"}
+                    />
                   </button>
                 ))}
               </div>
@@ -445,7 +468,9 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
             </button>
           </div>
 
-          {commentError ? <div className="availability-message">{commentError}</div> : null}
+          {commentError ? (
+            <div className="availability-message">{commentError}</div>
+          ) : null}
 
           <div className="comment-list">
             {tree.length > 0 ? (
@@ -470,7 +495,9 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
           <MessageCircle size={24} />
           <div>
             <h2>Join the discussion</h2>
-            <p className="muted">Sign in to view comments, ratings, replies and votes.</p>
+            <p className="muted">
+              Sign in to view comments, ratings, replies and votes.
+            </p>
           </div>
           <Link className="button" href="/login">
             Sign in
@@ -478,67 +505,76 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
         </section>
       ) : null}
 
-      {editing ? (
-        <div
-          className="article-editor-modal-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.currentTarget === event.target && !savingEdit) setEditing(false);
-          }}
-        >
-          <section
-            className="article-editor-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="public-article-edit-title"
-          >
-            <header className="article-editor-modal-header">
-              <div>
-                <p className="eyebrow muted">Editing article</p>
-                <h2 id="public-article-edit-title">
-                  <span className="modal-article-id">#{article.id}</span> {editTitle}
-                </h2>
-                <p className="muted">Edit the current content and save it directly.</p>
-              </div>
-              <button
-                type="button"
-                className="icon-button"
-                title="Close editor"
-                disabled={savingEdit}
-                onClick={() => setEditing(false)}
+      {editing && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="article-editor-modal-backdrop"
+              role="presentation"
+              onMouseDown={(event) => {
+                if (event.currentTarget === event.target && !savingEdit)
+                  setEditing(false);
+              }}
+            >
+              <section
+                className="article-editor-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="public-article-edit-title"
               >
-                <X size={19} />
-              </button>
-            </header>
-            <div className="article-editor-modal-body">
-              <RichTextEditor
-                title={editTitle}
-                bodyHtml={editBody}
-                disabled={savingEdit}
-                onTitleChange={setEditTitle}
-                onBodyChange={setEditBody}
-              />
-            </div>
-            <footer className="article-editor-modal-footer">
-              <Link className="button ghost" href={`/articles/${article.id}`}>
-                <Eye size={17} /> Preview
-              </Link>
-              <button
-                className="button red"
-                disabled={savingEdit || !editTitle.trim() || !hasMeaningfulBody(editBody)}
-                onClick={() => void saveArticleEdit()}
-              >
-                {savingEdit ? (
-                  <LoaderCircle className="spin" size={17} />
-                ) : (
-                  <Edit3 size={17} />
-                )}
-                Save article changes
-              </button>
-            </footer>
-          </section>
-        </div>
-      ) : null}
+                <header className="article-editor-modal-header">
+                  <div>
+                    <p className="eyebrow muted">Editing article</p>
+                    <h2 id="public-article-edit-title">
+                      <span className="modal-article-id">#{article.id}</span>{" "}
+                      {editTitle}
+                    </h2>
+                    <p className="muted">
+                      Edit the current content and save it directly.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    title="Close editor"
+                    disabled={savingEdit}
+                    onClick={() => setEditing(false)}
+                  >
+                    <X size={19} />
+                  </button>
+                </header>
+                <div className="article-editor-modal-body">
+                  <RichTextEditor
+                    title={editTitle}
+                    bodyHtml={editBody}
+                    disabled={savingEdit}
+                    onTitleChange={setEditTitle}
+                    onBodyChange={setEditBody}
+                  />
+                </div>
+                <footer className="article-editor-modal-footer">
+                  <Link className="button ghost" href={`/articles/${article.id}`}>
+                    <Eye size={17} /> Preview
+                  </Link>
+                  <button
+                    className="button red"
+                    disabled={
+                      savingEdit || !editTitle.trim() || !hasMeaningfulBody(editBody)
+                    }
+                    onClick={() => void saveArticleEdit()}
+                  >
+                    {savingEdit ? (
+                      <LoaderCircle className="spin" size={17} />
+                    ) : (
+                      <Edit3 size={17} />
+                    )}
+                    Save article changes
+                  </button>
+                </footer>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

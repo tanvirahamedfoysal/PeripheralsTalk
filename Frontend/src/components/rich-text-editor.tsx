@@ -45,10 +45,17 @@ export function RichTextEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const savedSelectionRef = useRef<Range | null>(null);
+  const insertionMarkerRef = useRef<HTMLSpanElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [tableRows, setTableRows] = useState("3");
   const [tableColumns, setTableColumns] = useState("3");
+
+  useEffect(() => {
+    return () => {
+      insertionMarkerRef.current?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -104,9 +111,69 @@ export function RichTextEditor({
     event.preventDefault();
   }
 
+  function createInsertionMarker(): void {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    insertionMarkerRef.current?.remove();
+
+    const marker = document.createElement("span");
+    marker.dataset.editorInsertionMarker = "true";
+    marker.setAttribute("aria-hidden", "true");
+    marker.style.display = "inline-block";
+    marker.style.width = "0";
+    marker.style.height = "1em";
+    marker.style.overflow = "hidden";
+    marker.textContent = "\u200B";
+
+    const savedRange = savedSelectionRef.current;
+    const range = document.createRange();
+
+    if (savedRange && editor.contains(savedRange.commonAncestorContainer)) {
+      range.setStart(savedRange.startContainer, savedRange.startOffset);
+      range.collapse(true);
+    } else {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+
+    range.insertNode(marker);
+    insertionMarkerRef.current = marker;
+  }
+
+  function removeInsertionMarker(restoreCaret: boolean): void {
+    const marker = insertionMarkerRef.current;
+    const editor = editorRef.current;
+    insertionMarkerRef.current = null;
+
+    if (!marker?.isConnected) {
+      if (restoreCaret) requestAnimationFrame(() => restoreSelection());
+      return;
+    }
+
+    if (restoreCaret && editor) {
+      const range = document.createRange();
+      range.setStartBefore(marker);
+      range.collapse(true);
+      marker.remove();
+
+      requestAnimationFrame(() => {
+        const selection = window.getSelection();
+        editor.focus();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        savedSelectionRef.current = range.cloneRange();
+      });
+      return;
+    }
+
+    marker.remove();
+  }
+
   function openTableDialog(): void {
     if (disabled) return;
     saveSelection();
+    createInsertionMarker();
     setTableRows("3");
     setTableColumns("3");
     setTableDialogOpen(true);
@@ -114,7 +181,7 @@ export function RichTextEditor({
 
   function closeTableDialog(): void {
     setTableDialogOpen(false);
-    requestAnimationFrame(() => restoreSelection());
+    removeInsertionMarker(true);
   }
 
   function insertTable(): void {
@@ -142,12 +209,56 @@ export function RichTextEditor({
       return `<tr>${cells}</tr>`;
     }).join("");
 
+    const tableHtml = `<div class="article-table-wrap"><table><thead><tr>${headingCells}</tr></thead><tbody>${bodyRows}</tbody></table></div><p><br></p>`;
+    const editor = editorRef.current;
+    const marker =
+      insertionMarkerRef.current ??
+      editor?.querySelector<HTMLSpanElement>("[data-editor-insertion-marker='true']") ??
+      null;
+
     setTableDialogOpen(false);
+
     requestAnimationFrame(() => {
-      execute(
-        "insertHTML",
-        `<div class="article-table-wrap"><table><thead><tr>${headingCells}</tr></thead><tbody>${bodyRows}</tbody></table></div><p><br></p>`,
-      );
+      if (!editor) return;
+
+      editor.focus();
+      const selection = window.getSelection();
+      const range = document.createRange();
+
+      if (marker?.isConnected) {
+        range.selectNode(marker);
+      } else if (
+        savedSelectionRef.current &&
+        editor.contains(savedSelectionRef.current.commonAncestorContainer)
+      ) {
+        range.setStart(
+          savedSelectionRef.current.startContainer,
+          savedSelectionRef.current.startOffset,
+        );
+        range.collapse(true);
+      } else {
+        range.selectNodeContents(editor);
+        range.collapse(false);
+      }
+
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      const inserted = document.execCommand("insertHTML", false, tableHtml);
+      if (!inserted) {
+        const template = document.createElement("template");
+        template.innerHTML = tableHtml;
+        const fragment = template.content.cloneNode(true);
+        range.deleteContents();
+        range.insertNode(fragment);
+      }
+
+      insertionMarkerRef.current = null;
+      editor
+        .querySelectorAll("[data-editor-insertion-marker='true']")
+        .forEach((node) => node.remove());
+      syncContent();
+      saveSelection();
       toast.success(`${rows} × ${columns} table inserted.`);
     });
   }

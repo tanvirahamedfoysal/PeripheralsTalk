@@ -15,3 +15,9 @@ pnpm typecheck
 pnpm lint
 pnpm build
 ```
+
+## Latest verification
+
+- All 124 TypeScript/TSX source files passed TypeScript syntax transpilation.
+- Public article modal now renders in a body-level portal.
+- Rich-text table insertion uses a persistent caret marker and contains no `window.prompt()` calls.

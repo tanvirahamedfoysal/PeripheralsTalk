@@ -15,3 +15,12 @@
 - Expanded the original fourteen categories to eight useful comparison specifications each.
 - Added an article discussion link when the public active-article endpoint returns an ID.
 - Raised the table chooser above the article-editing modal.
+
+## Public article editor and cursor-aware table insertion
+
+- The Editor/Admin article editor opened from category and article pages now renders through a React portal attached to `document.body`.
+- This removes clipping and stacking-context conflicts that previously showed only the blurred overlay.
+- Page scrolling is locked while the editor is open and Escape closes the editor when no save is running.
+- Table insertion now places a temporary invisible marker at the exact caret position before opening the table dialog.
+- The generated table replaces that marker, so it is inserted where the cursor was instead of at the beginning of the article.
+- Cancelling the dialog removes the marker and restores the caret.
