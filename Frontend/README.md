@@ -1,7 +1,7 @@
 # PeripheralsTalk Frontend — Public Articles, Nested Discussions and Rich Editing
 
 This is the complete Next.js frontend for the immutable deployed PeripheralsTalk
-FastAPI backend.
+FastAPI backend. 
 
 ## Current functionality
 
