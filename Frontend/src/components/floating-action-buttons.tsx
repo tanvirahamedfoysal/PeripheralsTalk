@@ -34,9 +34,9 @@ const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     name: "Md Mahruf Alam",
-    role: "Frontend Architect & Full Frontend Developer",
+    role: "Frontend Architect & Middleware Developer",
     description:
-      "Designed and developed the complete Next.js frontend, including the public learning experience, responsive interface, role-based dashboards, API integration, rich-text authoring tools and the platform's full visual system.",
+      "Designed and developed the complete Next.js frontend, including the public learning experience, responsive interface, JWT along with role-based dashboards, API integration, rich-text authoring tools and the platform's full visual system.",
     imageSrc: "/me.jpeg",
     icon: Braces,
   },
@@ -103,13 +103,13 @@ export function FloatingActionButtons(): React.ReactElement {
 
         <div className="pt-floating-action-item pt-team-action-item">
           <span className="pt-floating-tooltip" role="tooltip">
-            Meet the PeripheralsTalk team
+            Meet the Peripherals Talk team
           </span>
           <button
             type="button"
             className="pt-floating-button pt-team-button"
             onClick={() => setTeamOpen(true)}
-            aria-label="Meet the PeripheralsTalk team"
+            aria-label="Meet the Peripherals Talk team"
             aria-haspopup="dialog"
             aria-expanded={teamOpen}
           >
@@ -150,9 +150,9 @@ export function FloatingActionButtons(): React.ReactElement {
               <span className="pt-team-modal-kicker">
                 The people behind the platform
               </span>
-              <h2 id="pt-team-modal-title">Meet the PeripheralsTalk team</h2>
+              <h2 id="pt-team-modal-title">Meet the Peripherals Talk team</h2>
               <p>
-                Three complementary roles covering the platform&apos;s complete backend,
+                The minds behind the foundation of the platform, covering the platform&apos;s complete backend,
                 complete frontend and full educational content system.
               </p>
             </header>
@@ -204,7 +204,7 @@ export function FloatingActionButtons(): React.ReactElement {
             </div>
 
             <footer className="pt-team-modal-footer">
-              <span>PeripheralsTalk</span>
+              <span>Peripherals Talk</span>
               <p>Built as a structured learning platform for computer peripherals.</p>
             </footer>
           </section>
