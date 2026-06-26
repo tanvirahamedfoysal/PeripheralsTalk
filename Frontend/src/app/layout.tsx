@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 import "./globals.css";
 
@@ -24,6 +25,28 @@ export default function RootLayout({
 }>): React.ReactElement {
   return (
     <html lang="en">
+      <head>
+        <Script id="mathjax-configuration" strategy="beforeInteractive">
+          {`window.MathJax = {
+            tex: {
+              inlineMath: [['\\\\(', '\\\\)']],
+              displayMath: [['\\\\[', '\\\\]']],
+              processEscapes: true,
+              processEnvironments: true
+            },
+            options: {
+              enableMenu: false,
+              skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            },
+            startup: { typeset: false }
+          };`}
+        </Script>
+        <Script
+          id="mathjax-runtime"
+          src="/mathjax/es5/tex-mml-chtml.js"
+          strategy="afterInteractive"
+        />
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

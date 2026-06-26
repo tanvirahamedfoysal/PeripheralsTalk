@@ -9,6 +9,7 @@ import {
   ListOrdered,
   LoaderCircle,
   Pilcrow,
+  Sigma,
   Table2,
   Underline,
   X,
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 import { apiRequest } from "@/lib/api/client";
 import { apiPaths } from "@/lib/api/paths";
 import type { UploadImageResponse } from "@/lib/api/types";
+import { serializeEditorHtml, typesetMath } from "@/lib/mathjax";
 
 interface RichTextEditorProps {
   title: string;
@@ -34,6 +36,8 @@ interface RichTextEditorProps {
   onTitleChange: (value: string) => void;
   onBodyChange: (value: string) => void;
 }
+
+type EquationMode = "inline" | "display";
 
 export function RichTextEditor({
   title,
@@ -46,10 +50,15 @@ export function RichTextEditor({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const savedSelectionRef = useRef<Range | null>(null);
   const insertionMarkerRef = useRef<HTMLSpanElement | null>(null);
+  const lastSyncedHtmlRef = useRef("");
+  const equationPreviewRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [tableRows, setTableRows] = useState("3");
   const [tableColumns, setTableColumns] = useState("3");
+  const [equationDialogOpen, setEquationDialogOpen] = useState(false);
+  const [equationSource, setEquationSource] = useState("E = mc^2");
+  const [equationMode, setEquationMode] = useState<EquationMode>("display");
 
   useEffect(() => {
     return () => {
@@ -59,13 +68,41 @@ export function RichTextEditor({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (editor && editor.innerHTML !== bodyHtml) {
-      editor.innerHTML = bodyHtml;
-    }
+    if (!editor || bodyHtml === lastSyncedHtmlRef.current) return;
+
+    editor.innerHTML = bodyHtml;
+    lastSyncedHtmlRef.current = bodyHtml;
+    void typesetMath(editor);
   }, [bodyHtml]);
 
+  useEffect(() => {
+    const preview = equationPreviewRef.current;
+    if (!preview || !equationDialogOpen) return;
+
+    preview.replaceChildren();
+    const formula = document.createElement(
+      equationMode === "display" ? "div" : "span",
+    );
+    formula.className = `pt-latex pt-latex-${equationMode}`;
+    formula.dataset.latex = equationSource || "E = mc^2";
+    formula.dataset.display = equationMode === "display" ? "block" : "inline";
+    formula.textContent =
+      equationMode === "display"
+        ? `\\[${formula.dataset.latex}\\]`
+        : `\\(${formula.dataset.latex}\\)`;
+    preview.append(formula);
+    void typesetMath(preview);
+  }, [equationDialogOpen, equationMode, equationSource]);
+
+  function currentEditorHtml(): string {
+    const editor = editorRef.current;
+    return editor ? serializeEditorHtml(editor) : "";
+  }
+
   function syncContent(): void {
-    onBodyChange(editorRef.current?.innerHTML ?? "");
+    const html = currentEditorHtml();
+    lastSyncedHtmlRef.current = html;
+    onBodyChange(html);
   }
 
   function saveSelection(): void {
@@ -87,7 +124,10 @@ export function RichTextEditor({
     editor.focus();
     selection.removeAllRanges();
 
-    if (savedSelectionRef.current) {
+    if (
+      savedSelectionRef.current &&
+      editor.contains(savedSelectionRef.current.commonAncestorContainer)
+    ) {
       selection.addRange(savedSelectionRef.current);
       return;
     }
@@ -184,6 +224,125 @@ export function RichTextEditor({
     removeInsertionMarker(true);
   }
 
+  function openEquationDialog(): void {
+    if (disabled) return;
+    saveSelection();
+    createInsertionMarker();
+    setEquationSource("E = mc^2");
+    setEquationMode("display");
+    setEquationDialogOpen(true);
+  }
+
+  function closeEquationDialog(): void {
+    setEquationDialogOpen(false);
+    removeInsertionMarker(true);
+  }
+
+  function getInsertionRange(editor: HTMLElement): {
+    range: Range;
+    marker: HTMLSpanElement | null;
+  } {
+    const marker =
+      insertionMarkerRef.current ??
+      editor.querySelector<HTMLSpanElement>("[data-editor-insertion-marker='true']") ??
+      null;
+    const range = document.createRange();
+
+    if (marker?.isConnected) {
+      range.selectNode(marker);
+      return { range, marker };
+    }
+
+    if (
+      savedSelectionRef.current &&
+      editor.contains(savedSelectionRef.current.commonAncestorContainer)
+    ) {
+      range.setStart(
+        savedSelectionRef.current.startContainer,
+        savedSelectionRef.current.startOffset,
+      );
+      range.collapse(true);
+      return { range, marker: null };
+    }
+
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    return { range, marker: null };
+  }
+
+  function insertHtmlAtSelection(
+    html: string,
+    options: { typeset?: boolean; toastMessage?: string } = {},
+  ): void {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    editor.focus();
+    const selection = window.getSelection();
+    const { range } = getInsertionRange(editor);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    const inserted = document.execCommand("insertHTML", false, html);
+    if (!inserted) {
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      range.deleteContents();
+      range.insertNode(template.content.cloneNode(true));
+    }
+
+    insertionMarkerRef.current = null;
+    editor
+      .querySelectorAll("[data-editor-insertion-marker='true']")
+      .forEach((node) => node.remove());
+    syncContent();
+    saveSelection();
+    if (options.typeset) void typesetMath(editor);
+    if (options.toastMessage) toast.success(options.toastMessage);
+  }
+
+  function insertMediaItem(itemHtml: string, toastMessage: string): void {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    editor.focus();
+    const selection = window.getSelection();
+    const { range, marker } = getInsertionRange(editor);
+    const nearbyGrid = findNearbyMediaGrid(editor, range);
+
+    if (nearbyGrid) {
+      const template = document.createElement("template");
+      template.innerHTML = itemHtml;
+      nearbyGrid.append(template.content.cloneNode(true));
+      marker?.remove();
+      insertionMarkerRef.current = null;
+      placeCaretAfterMediaGrid(editor, nearbyGrid);
+      syncContent();
+      toast.success(toastMessage);
+      return;
+    }
+
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    const gridHtml = `<div class="article-media-grid" data-media-grid="true">${itemHtml}</div><p><br></p>`;
+    const inserted = document.execCommand("insertHTML", false, gridHtml);
+
+    if (!inserted) {
+      const template = document.createElement("template");
+      template.innerHTML = gridHtml;
+      range.deleteContents();
+      range.insertNode(template.content.cloneNode(true));
+    }
+
+    insertionMarkerRef.current = null;
+    editor
+      .querySelectorAll("[data-editor-insertion-marker='true']")
+      .forEach((node) => node.remove());
+    syncContent();
+    saveSelection();
+    toast.success(toastMessage);
+  }
+
   function insertTable(): void {
     if (disabled) return;
 
@@ -209,57 +368,42 @@ export function RichTextEditor({
       return `<tr>${cells}</tr>`;
     }).join("");
 
-    const tableHtml = `<div class="article-table-wrap"><table><thead><tr>${headingCells}</tr></thead><tbody>${bodyRows}</tbody></table></div><p><br></p>`;
-    const editor = editorRef.current;
-    const marker =
-      insertionMarkerRef.current ??
-      editor?.querySelector<HTMLSpanElement>("[data-editor-insertion-marker='true']") ??
-      null;
+    const itemHtml = [
+      '<div class="article-media-item article-media-table">',
+      '<div class="article-table-wrap">',
+      `<table><thead><tr>${headingCells}</tr></thead><tbody>${bodyRows}</tbody></table>`,
+      "</div>",
+      "</div>",
+    ].join("");
 
     setTableDialogOpen(false);
-
     requestAnimationFrame(() => {
-      if (!editor) return;
+      insertMediaItem(itemHtml, `${rows} × ${columns} table inserted.`);
+    });
+  }
 
-      editor.focus();
-      const selection = window.getSelection();
-      const range = document.createRange();
+  function insertEquation(): void {
+    const latex = equationSource.trim();
+    if (!latex) {
+      toast.error("Enter a LaTeX formula before inserting it.");
+      return;
+    }
 
-      if (marker?.isConnected) {
-        range.selectNode(marker);
-      } else if (
-        savedSelectionRef.current &&
-        editor.contains(savedSelectionRef.current.commonAncestorContainer)
-      ) {
-        range.setStart(
-          savedSelectionRef.current.startContainer,
-          savedSelectionRef.current.startOffset,
-        );
-        range.collapse(true);
-      } else {
-        range.selectNodeContents(editor);
-        range.collapse(false);
-      }
+    const safeAttribute = escapeHtml(latex);
+    const safeText = escapeHtml(latex);
+    const display = equationMode === "display";
+    const tag = display ? "div" : "span";
+    const source = display ? `\\[${safeText}\\]` : `\\(${safeText}\\)`;
+    const html = display
+      ? `<${tag} class="pt-latex pt-latex-display" data-latex="${safeAttribute}" data-display="block" contenteditable="false">${source}</${tag}><p><br></p>`
+      : `<${tag} class="pt-latex pt-latex-inline" data-latex="${safeAttribute}" data-display="inline" contenteditable="false">${source}</${tag}>&nbsp;`;
 
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-
-      const inserted = document.execCommand("insertHTML", false, tableHtml);
-      if (!inserted) {
-        const template = document.createElement("template");
-        template.innerHTML = tableHtml;
-        const fragment = template.content.cloneNode(true);
-        range.deleteContents();
-        range.insertNode(fragment);
-      }
-
-      insertionMarkerRef.current = null;
-      editor
-        .querySelectorAll("[data-editor-insertion-marker='true']")
-        .forEach((node) => node.remove());
-      syncContent();
-      saveSelection();
-      toast.success(`${rows} × ${columns} table inserted.`);
+    setEquationDialogOpen(false);
+    requestAnimationFrame(() => {
+      insertHtmlAtSelection(html, {
+        typeset: true,
+        toastMessage: `${display ? "Display" : "Inline"} equation inserted.`,
+      });
     });
   }
 
@@ -285,17 +429,11 @@ export function RichTextEditor({
       const descriptiveName = file.name
         .replace(/\.[^.]+$/, "")
         .replaceAll(/[-_]+/g, " ");
-      const safeAlt = (descriptiveName || "Article illustration")
-        .replaceAll("&", "&amp;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
+      const safeAlt = escapeHtml(descriptiveName || "Article illustration");
+      const safeUrl = escapeHtml(response.url);
+      const itemHtml = `<figure class="article-media-item article-media-image"><img src="${safeUrl}" alt="${safeAlt}" /><figcaption>${safeAlt}</figcaption></figure>`;
 
-      execute(
-        "insertHTML",
-        `<figure><img src="${response.url}" alt="${safeAlt}" /><figcaption>${safeAlt}</figcaption></figure><p><br></p>`,
-      );
-      toast.success("Image uploaded and inserted into the article.");
+      insertMediaItem(itemHtml, "Image uploaded and inserted into the article.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Image upload failed.");
     } finally {
@@ -408,6 +546,14 @@ export function RichTextEditor({
               <ImagePlus size={17} />
             )}
           </ToolbarButton>
+          <ToolbarButton
+            label="Insert LaTeX equation"
+            onMouseDown={preventToolbarBlur}
+            onClick={openEquationDialog}
+            disabled={disabled}
+          >
+            <Sigma size={17} />
+          </ToolbarButton>
           <input
             ref={imageInputRef}
             type="file"
@@ -436,8 +582,9 @@ export function RichTextEditor({
           onBlur={syncContent}
         />
         <small className="muted">
-          The title, headings, formatting, tables and images are saved together and
-          restored when the article is opened.
+          Titles, headings, images, responsive tables and LaTeX equations are saved
+          together. Consecutive images and tables automatically share centered rows when
+          space is available.
         </small>
       </div>
 
@@ -470,7 +617,7 @@ export function RichTextEditor({
             <div className="editor-dialog-heading">
               <div>
                 <p className="eyebrow muted">Table settings</p>
-                <h3 id="insert-table-title">Insert a table</h3>
+                <h3 id="insert-table-title">Insert a responsive table</h3>
               </div>
               <button
                 type="button"
@@ -517,8 +664,8 @@ export function RichTextEditor({
             </div>
 
             <p className="muted editor-dialog-note">
-              The first row is inserted as the table heading. You can edit every cell
-              directly after insertion.
+              The first row is inserted as the heading. Consecutive tables are centered,
+              spaced evenly and wrapped to a new row when the editor is too narrow.
             </p>
 
             <div className="actions editor-dialog-actions">
@@ -532,8 +679,173 @@ export function RichTextEditor({
           </div>
         </div>
       ) : null}
+
+      {equationDialogOpen ? (
+        <div
+          className="editor-dialog-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.currentTarget === event.target) closeEquationDialog();
+          }}
+        >
+          <div
+            className="editor-dialog equation-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="insert-equation-title"
+            onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                closeEquationDialog();
+              }
+            }}
+          >
+            <div className="editor-dialog-heading">
+              <div>
+                <p className="eyebrow muted">Mathematical notation</p>
+                <h3 id="insert-equation-title">Insert a LaTeX equation</h3>
+              </div>
+              <button
+                type="button"
+                className="icon-button"
+                title="Close"
+                onClick={closeEquationDialog}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="latex-equation-source">
+                LaTeX source
+              </label>
+              <textarea
+                id="latex-equation-source"
+                className="textarea equation-source-input"
+                value={equationSource}
+                onChange={(event) => setEquationSource(event.target.value)}
+                placeholder="Example: \\frac{a}{b} = \\sqrt{x^2 + y^2}"
+                autoFocus
+                spellCheck={false}
+              />
+            </div>
+
+            <div className="equation-mode-control" role="group" aria-label="Equation type">
+              <button
+                type="button"
+                className={equationMode === "inline" ? "active" : ""}
+                onClick={() => setEquationMode("inline")}
+              >
+                Inline equation
+              </button>
+              <button
+                type="button"
+                className={equationMode === "display" ? "active" : ""}
+                onClick={() => setEquationMode("display")}
+              >
+                Display equation
+              </button>
+            </div>
+
+            <div className="equation-preview-shell">
+              <span className="label">Live preview</span>
+              <div ref={equationPreviewRef} className="equation-preview" />
+            </div>
+
+            <div className="latex-example-grid" aria-label="LaTeX examples">
+              <button type="button" onClick={() => setEquationSource("E = mc^2")}>
+                E = mc^2
+              </button>
+              <button
+                type="button"
+                onClick={() => setEquationSource("\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}")}
+              >
+                Quadratic formula
+              </button>
+              <button
+                type="button"
+                onClick={() => setEquationSource("\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}")}
+              >
+                Summation
+              </button>
+              <button
+                type="button"
+                onClick={() => setEquationSource("\\int_a^b f(x)\\,dx")}
+              >
+                Integral
+              </button>
+            </div>
+
+            <div className="actions editor-dialog-actions">
+              <button
+                type="button"
+                className="button ghost"
+                onClick={closeEquationDialog}
+              >
+                Cancel
+              </button>
+              <button type="button" className="button" onClick={insertEquation}>
+                <Sigma size={17} /> Insert equation
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function findNearbyMediaGrid(editor: HTMLElement, range: Range): HTMLElement | null {
+  const start =
+    range.startContainer.nodeType === Node.ELEMENT_NODE
+      ? (range.startContainer as HTMLElement)
+      : range.startContainer.parentElement;
+  if (!start || !editor.contains(start)) return null;
+
+  let topLevel: HTMLElement = start;
+  while (topLevel.parentElement && topLevel.parentElement !== editor) {
+    topLevel = topLevel.parentElement;
+  }
+
+  if (topLevel.matches(".article-media-grid")) return topLevel;
+
+  const visuallyEmpty =
+    topLevel.matches("p, div") &&
+    (topLevel.textContent ?? "").replace(/[\s\u200B]/g, "").length === 0;
+
+  if (visuallyEmpty) {
+    const previous = topLevel.previousElementSibling;
+    if (previous instanceof HTMLElement && previous.matches(".article-media-grid")) {
+      return previous;
+    }
+  }
+
+  return null;
+}
+
+function placeCaretAfterMediaGrid(editor: HTMLElement, grid: HTMLElement): void {
+  let target = grid.nextElementSibling;
+  if (!(target instanceof HTMLParagraphElement)) {
+    target = document.createElement("p");
+    target.append(document.createElement("br"));
+    grid.after(target);
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(target);
+  range.collapse(false);
+  const selection = window.getSelection();
+  editor.focus();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
 }
 
 function ToolbarButton({

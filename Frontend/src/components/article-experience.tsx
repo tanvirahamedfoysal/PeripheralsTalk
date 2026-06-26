@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
+import { MathTypesetContent } from "@/components/math-typeset-content";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { parseArticleDocument, serializeArticleDocument } from "@/lib/article-document";
 import { apiRequest } from "@/lib/api/client";
@@ -381,11 +382,9 @@ export function ArticleExperience({ articleId }: { articleId: string }) {
           </div>
         ) : null}
 
-        <div
+        <MathTypesetContent
           className="rich-article"
-          dangerouslySetInnerHTML={{
-            __html: sanitizeArticleHtml(article.content || ""),
-          }}
+          html={sanitizeArticleHtml(article.content || "")}
         />
 
         {session ? (
