@@ -127,8 +127,7 @@ export function PublishedArticles(): React.ReactElement {
         if (!normalizedQuery) return true;
         return (
           record.title.toLowerCase().includes(normalizedQuery) ||
-          record.category.name.toLowerCase().includes(normalizedQuery) ||
-          (record.article && String(record.article.id).includes(normalizedQuery))
+          record.category.name.toLowerCase().includes(normalizedQuery)
         );
       }),
     [normalizedQuery, records],
@@ -143,8 +142,8 @@ export function PublishedArticles(): React.ReactElement {
           </p>
           <h2>Browse every available article.</h2>
           <p className="muted">
-            Open the current published lesson for each peripheral, or use the article ID
-            finder above when you already know the exact record.
+            Browse the currently published lessons by title or category and continue
+            learning from the complete public library.
           </p>
         </div>
         {loading ? <LoaderCircle className="spin" size={28} /> : <BookOpen size={28} />}
@@ -157,7 +156,7 @@ export function PublishedArticles(): React.ReactElement {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Filter by title, category or article ID"
+          placeholder="Filter by title or category"
         />
       </label>
 
@@ -215,7 +214,7 @@ export function PublishedArticles(): React.ReactElement {
             <p className="muted">
               {loading
                 ? "The published library is being prepared."
-                : "Try another title, category, or article ID."}
+                : "Try another title or category."}
             </p>
           </div>
         </div>

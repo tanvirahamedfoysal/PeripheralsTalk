@@ -1,5 +1,0 @@
-backend:
-    Framework : FastAPI
-    Database : Postgres
-    For RBAC : JWT
-    

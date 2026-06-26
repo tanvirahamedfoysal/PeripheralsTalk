@@ -33,6 +33,7 @@ const navs: Record<UserRole, { href: string; label: string; icon: typeof Home }[
   EDITOR: [
     { href: "/editor/articles", label: "Articles", icon: BookOpen },
     { href: "/editor/articles/new", label: "Write article", icon: FilePlus2 },
+    { href: "/editor/bookmarks", label: "Saved articles", icon: Bookmark },
     { href: "/editor/moderation", label: "Community standards", icon: Flag },
     { href: "/editor/settings", label: "Settings", icon: Settings },
   ],
@@ -41,6 +42,7 @@ const navs: Record<UserRole, { href: string; label: string; icon: typeof Home }[
     { href: "/admin/categories", label: "Categories", icon: Tags },
     { href: "/admin/articles", label: "Articles", icon: BookOpen },
     { href: "/admin/articles/new", label: "Write article", icon: FilePlus2 },
+    { href: "/admin/bookmarks", label: "Saved articles", icon: Bookmark },
     { href: "/admin/editor-requests", label: "Editor requests", icon: ShieldCheck },
     { href: "/admin/reports", label: "Reports", icon: Flag },
     { href: "/admin/settings", label: "Settings", icon: Settings },
