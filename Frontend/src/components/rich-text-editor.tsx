@@ -582,9 +582,7 @@ export function RichTextEditor({
           onBlur={syncContent}
         />
         <small className="muted">
-          Titles, headings, images, responsive tables and LaTeX equations are saved
-          together. Consecutive images and tables automatically share centered rows when
-          space is available.
+          Titles, headings, images, responsive tables and LaTeX equations are available for editing articles as you like.
         </small>
       </div>
 

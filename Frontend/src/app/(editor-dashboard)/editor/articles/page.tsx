@@ -6,7 +6,7 @@ export default function EditorArticlesPage() {
     <DashboardPage
       eyebrow="Content management"
       title="Find and edit articles."
-      description="Search by article ID or choose a recent published article. Editing opens the current content in the complete rich-text workspace."
+      description="Search by article ID or choose a recent published article. Editing opens the current content in the workspace."
     >
       <ArticleManager />
     </DashboardPage>

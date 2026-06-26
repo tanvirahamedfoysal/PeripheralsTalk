@@ -6,7 +6,7 @@ export default function AdminBookmarksPage() {
     <DashboardPage
       eyebrow="Saved learning"
       title="Your favorite articles."
-      description="Save platform articles you want to review, audit, improve, or return to later."
+      description="Save platform articles you want to review, audit, improve or return to later."
     >
       <ArticleQuickTools mode="bookmark" />
     </DashboardPage>

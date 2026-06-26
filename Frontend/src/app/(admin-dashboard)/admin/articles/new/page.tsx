@@ -6,7 +6,7 @@ export default function NewAdminArticlePage() {
     <DashboardPage
       eyebrow="New content"
       title="Create an article."
-      description="Write a complete rich-text article. Its permanent searchable ID is assigned by the database after saving."
+      description="Write a complete article. You can add headings, images, tables, equations and more. You can also add multiple sections to your article."
     >
       <ArticleWorkspace admin createOnly />
     </DashboardPage>
