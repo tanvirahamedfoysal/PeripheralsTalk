@@ -36,6 +36,7 @@ dependencies = [
     "psycopg2-binary>=2.9.12",
     "cloudinary>=1.44.2",
     "argon2-cffi>=25.1.0",
+    "fastapi-cloud-cli>=0.21.0",
 ]
 
 [project.optional-dependencies]
