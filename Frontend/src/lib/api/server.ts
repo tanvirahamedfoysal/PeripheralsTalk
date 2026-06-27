@@ -3,7 +3,7 @@ import "server-only";
 import type { BackendErrorPayload } from "./types";
 
 const BASE_URL = (
-  process.env.FASTAPI_BASE_URL || "https://peripheralstalk-106b064b.fastapicloud.dev"
+  process.env.FASTAPI_BASE_URL || "https://peripheralstalk-f4aa79e9.fastapicloud.dev/"
 ).replace(/\/$/, "");
 
 const API_PREFIX = (process.env.FASTAPI_API_PREFIX || "/api/v1").replace(/\/$/, "");
