@@ -1925,9 +1925,17 @@ body::-webkit-scrollbar,
     grid-template-columns: 1fr;
   }
 
-  .topbar .header-actions .icon-button {
+  @media (max-width: 520px) {
+  .topbar .header-actions .icon-button:not(.mobile-nav-button) {
     display: none;
   }
+
+  .topbar .header-actions .mobile-nav-button {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+  }
+}
 
   .dashboard-section,
   .metric,
