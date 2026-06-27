@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Eye, LoaderCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Eye, LoaderCircle, RefreshCw, Ban } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -74,6 +74,23 @@ export function AdminReports() {
     }
   }
 
+  async function suspendUser(userId: number) {
+    setWorking(`suspend-${userId}`);
+    try {
+      const response = await apiRequest<{ message?: string }>(
+        apiPaths.admin.suspend(userId),
+        { method: "POST" }
+      );
+      toast.success(response.message ?? "User has been suspended.");
+      
+      setInspectedUser((prev) => prev ? { ...prev, is_active: false } : null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to suspend user.");
+    } finally {
+      setWorking(null);
+    }
+  }
+
   return (
     <section className="dashboard-section">
       <div className="toolbar">
@@ -100,9 +117,28 @@ export function AdminReports() {
           <span className={`status ${inspectedUser.is_active ? "aqua" : "red"}`}>
             {inspectedUser.role} / {inspectedUser.is_active ? "Active" : "Suspended"}
           </span>
-          <button className="button ghost" onClick={() => setInspectedUser(null)}>
-            Close
-          </button>
+          
+          {}
+          <div className="actions" style={{ marginTop: "1rem" }}>
+            <button className="button ghost" onClick={() => setInspectedUser(null)}>
+              Close
+            </button>
+            
+            {inspectedUser.is_active && (
+              <button 
+                className="button red" 
+                disabled={working !== null}
+                onClick={() => void suspendUser(inspectedUser.user_id)}
+              >
+                {working === `suspend-${inspectedUser.user_id}` ? (
+                  <LoaderCircle className="spin" size={17} />
+                ) : (
+                  <Ban size={17} />
+                )}
+                Suspend User
+              </button>
+            )}
+          </div>
         </div>
       ) : null}
 
