@@ -75,11 +75,16 @@ export function AdminReports() {
   }
 
   async function suspendUser(userId: number) {
+    if (inspectedUser?.role.toLowerCase() === "admin") {
+      toast.error("You cannot suspend another Admin account.");
+      return;
+    }
+
     setWorking(`suspend-${userId}`);
     try {
       const response = await apiRequest<{ message?: string }>(
         apiPaths.admin.suspend(userId),
-        { method: "POST" }
+        { method: "POST" } 
       );
       toast.success(response.message ?? "User has been suspended.");
       
@@ -118,26 +123,32 @@ export function AdminReports() {
             {inspectedUser.role} / {inspectedUser.is_active ? "Active" : "Suspended"}
           </span>
           
-          {}
-          <div className="actions" style={{ marginTop: "1rem" }}>
+          <div className="actions" style={{ marginTop: "1rem", alignItems: "center" }}>
             <button className="button ghost" onClick={() => setInspectedUser(null)}>
               Close
             </button>
             
-            {inspectedUser.is_active && (
-              <button 
-                className="button red" 
-                disabled={working !== null}
-                onClick={() => void suspendUser(inspectedUser.user_id)}
-              >
-                {working === `suspend-${inspectedUser.user_id}` ? (
-                  <LoaderCircle className="spin" size={17} />
-                ) : (
-                  <Ban size={17} />
-                )}
-                Suspend User
-              </button>
-            )}
+            {}
+            {inspectedUser.is_active ? (
+              inspectedUser.role.toLowerCase() === "admin" ? (
+                <small className="muted" style={{ marginLeft: "auto" }}>
+                  * Admins cannot be suspended
+                </small>
+              ) : (
+                <button 
+                  className="button red" 
+                  disabled={working !== null}
+                  onClick={() => void suspendUser(inspectedUser.user_id)}
+                >
+                  {working === `suspend-${inspectedUser.user_id}` ? (
+                    <LoaderCircle className="spin" size={17} />
+                  ) : (
+                    <Ban size={17} />
+                  )}
+                  Suspend User
+                </button>
+              )
+            ) : null}
           </div>
         </div>
       ) : null}
