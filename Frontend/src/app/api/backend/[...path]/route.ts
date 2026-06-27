@@ -5,7 +5,7 @@ import { isAllowedBackendRequest } from "@/lib/api/allowed";
 import { AUTH_COOKIE } from "@/lib/auth/cookie";
 
 const BASE_URL = (
-  process.env.FASTAPI_BASE_URL || "https://peripheralstalk-106b064b.fastapicloud.dev"
+  process.env.FASTAPI_BASE_URL || "https://peripheralstalk-f4aa79e9.fastapicloud.dev"
 ).replace(/\/$/, "");
 const PREFIX = (process.env.FASTAPI_API_PREFIX || "/api/v1").replace(/\/$/, "");
 const TIMEOUT = Number(process.env.FASTAPI_REQUEST_TIMEOUT_MS || 60000);
