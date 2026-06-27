@@ -8,7 +8,7 @@ function positiveInt(value: string | undefined, fallback: number): number {
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   FASTAPI_BASE_URL:
-    process.env.FASTAPI_BASE_URL ?? "https://peripheralstalk-106b064b.fastapicloud.dev",
+    process.env.FASTAPI_BASE_URL ?? "https://peripheralstalk-f4aa79e9.fastapicloud.dev/",
   FASTAPI_API_PREFIX: process.env.FASTAPI_API_PREFIX ?? "/api/v1",
   FASTAPI_REQUEST_TIMEOUT_MS: positiveInt(
     process.env.FASTAPI_REQUEST_TIMEOUT_MS,
