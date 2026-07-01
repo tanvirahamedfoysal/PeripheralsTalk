@@ -1,57 +1,93 @@
-# PeripheralsTalk Frontend — Public Articles, Nested Discussions and Rich Editing
+# PeripheralsTalk Frontend
 
-This is the complete Next.js frontend for the immutable deployed PeripheralsTalk
-FastAPI backend. 
+The frontend is a Next.js application that presents the PeripheralsTalk learning platform to users. It surfaces public content such as categories and articles, while also providing authenticated experiences for dashboard, editor, and admin workflows.
 
-## Current functionality
+## Current capabilities
 
-- Public category directory with live database categories.
-- Compact category detail pages with expanded comparison specifications.
-- Public article library assembled from the backend's published active articles.
-- Direct article lookup by permanent database article ID.
-- Nested comments and replies using `parent_comment_id`.
-- Comment upvote/downvote toggles, editing, deletion and reporting.
-- Role-aware article interactions: ratings and bookmarks require authentication.
-- Editor and Admin article search by ID.
-- Recent article management with rich-text editing in a modal.
-- Rich-text titles, headings, bold, italic, underline, lists, tables and images.
-- Admin publication controls and separate Admin article creation page.
-- Database-assigned article IDs are displayed to Admins and Editors but hidden
-  from ordinary public readers.
+- Public home page with category discovery and featured content
+- Category browsing and detail views with structured comparison content
+- Article library and direct article lookup by ID
+- Nested comments, replies, ratings, bookmarks, and report actions
+- Rich-text article authoring and editing experiences
+- Role-based dashboard routes for user, editor, and admin experiences
 
-## Backend connection
-
-The included environment files target:
+## Project structure
 
 ```text
-https://peripheralstalk-106b064b.fastapicloud.dev/api/v1
+Frontend/
+├── src/app/               # App Router pages and route handlers
+├── src/components/        # Reusable UI components
+├── src/lib/               # API helpers, auth cookie utilities, and shared logic
+├── src/proxy.ts           # Middleware that protects dashboard/editor/admin routes
+├── package.json           # Frontend scripts and dependencies
+└── next.config.ts        # Next.js configuration
 ```
 
-The browser communicates through the Next.js server proxy. The frontend never
-connects directly to Neon PostgreSQL and contains no database credentials.
+## Runtime stack
 
-## Install
+- Next.js 16 with the App Router
+- React 19 and TypeScript
+- Server-side route handlers for backend communication
+- Protected route middleware for authenticated areas
 
-Copy the ZIP contents into your `Frontend` folder, then run:
+## Local development
 
-```powershell
-cd D:\PROJ\PeripheralsTalk\Frontend
-Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
+### Prerequisites
+
+- Node.js 22+
+- pnpm
+
+### Setup
+
+```bash
+cd Frontend
 pnpm install
-pnpm run dev
 ```
 
-Open:
+### Run the development server
+
+```bash
+pnpm dev
+```
+
+Open http://localhost:3000.
+
+## Backend integration
+
+The frontend does not call the backend directly from the browser. Instead, it uses Next.js route handlers and the server-side proxy layer to forward requests to the backend API. The default backend target is:
 
 ```text
-http://localhost:3000
+https://peripheralstalk-f4aa79e9.fastapicloud.dev
 ```
 
-## Validation commands
+Relevant integration points include:
 
-```powershell
+- [src/app/api/backend/[...path]/route.ts](src/app/api/backend/[...path]/route.ts)
+- [src/lib/api/server.ts](src/lib/api/server.ts)
+- [src/proxy.ts](src/proxy.ts)
+
+## Available validation commands
+
+```bash
 pnpm format:check
 pnpm typecheck
 pnpm lint
 pnpm build
 ```
+
+## Environment variables
+
+Common variables used by the frontend include:
+
+- FASTAPI_BASE_URL
+- FASTAPI_API_PREFIX
+- FASTAPI_REQUEST_TIMEOUT_MS
+- AUTH_COOKIE_NAME
+- AUTH_COOKIE_SECURE
+- AUTH_COOKIE_MAX_AGE_SECONDS
+
+## Development notes
+
+- Keep protected dashboard routes behind the proxy and auth middleware
+- Prefer updating the API routes and UI together when adding new features
+- Use the backend API docs as the source of truth for request and response shapes
